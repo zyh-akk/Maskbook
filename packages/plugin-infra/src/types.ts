@@ -47,6 +47,7 @@ export namespace Plugin {
         Dashboard?: Loader<Dashboard.Definition>
         /** Load the Worker part of the plugin. */
         Worker?: Loader<Worker.Definition>
+        ContextFree?: Loader<ContextFree.DefinitionDeferred>
     }
 }
 /**
@@ -185,6 +186,8 @@ export namespace Plugin.SNSAdaptor {
         CompositionDialogMetadataBadgeRender?: CompositionMetadataBadgeRender
         /** This UI will be rendered as an entry in the toolbar (if the SNS has a Toolbar support) */
         ToolbarEntry?: ToolbarEntry
+        /** Plugin DO NOT need to define this. This will be auto set by the plugin host. */
+        __contextFree__?: ContextFree.DefinitionDeferred
     }
     //#region Composition entry
     /**
@@ -268,6 +271,8 @@ export namespace Plugin.Dashboard {
     export interface Definition extends Shared.DefinitionDeferred {
         /** This UI will be injected into the global scope of the Dashboard. */
         GlobalInjection?: InjectUI<{}>
+        /** Plugin DO NOT need to define this. This will be auto set by the plugin host. */
+        __contextFree__?: ContextFree.DefinitionDeferred
     }
 }
 
@@ -294,6 +299,90 @@ export namespace Plugin.Worker {
          * You MUST treat the data as untrustful content because it can be modified by the user.
          */
         onRestore(data: unknown): Promise<Result<void, Error>>
+    }
+}
+
+/** This part defines the plugin part that does not context aware. */
+export namespace Plugin.ContextFree {
+    export interface DefinitionDeferred {
+        /**
+         * Render metadata in many different environments.
+         *
+         * 1. Environment
+         *
+         * The render component MUST NOT assume they are running in a specific environment (e.g. SNS Adaptor).
+         * Plugin messages and RPC MAY NOT working.
+         *
+         * It MUST NOT assume the environment using the `context` props.
+         * ALL actions MUST BE DONE with the given props.
+         *
+         * Here is some example of *possible* environments.
+         * - inside SNS Adaptor, given "composition" context, running in the CompositionDialog.
+         * - inside SNS Adaptor, given "post" context,        running in the DecryptedPost.
+         * - inside Dashboard,   given "post" context,        running in the PostHistory as the previewer.
+         * - inside Popups,      given "post" context,        running in the PostInspector (Isolated mode).
+         * - on mask.io,         given "post" context,        allowing preview the message without extension installed.
+         *
+         * 2. Contexts
+         *
+         * The render component might be used in many different contexts.
+         *
+         * - "composition" context, the render should be editable, but not interactive (e.g. allow vote).
+         * - "post" context, the render should be readonly, but interactive.
+         *
+         * 3. Actions
+         *
+         * The render component MUST BE a ForwardRefExotic React Component
+         * that support operations defined in `Plugin.ContextFree.MetadataRender.RenderActions`
+         */
+        metadataRender: MetadataRender.StaticRender | MetadataRender.DynamicRender
+    }
+
+    export namespace MetadataRender {
+        export type MetadataReader<T> = (meta: TypedMessage['meta']) => Result<T, unknown>
+        //#region Static render
+        // new Map([ [reader, react component] ])
+        export type StaticRender<T = any> = ReadonlyMap<MetadataReader<T>, StaticRenderComponent<T>>
+        export type StaticRenderComponent<T> = React.ForwardRefExoticComponent<StaticRenderProps<T>>
+        export type StaticRenderProps<T> = Context<T> & React.RefAttributes<RenderActions<T>> & { metadata: T }
+        //#endregion
+        //#region DynamicRender
+        export type DynamicRender = React.ForwardRefExoticComponent<DynamicRenderProps>
+        export type DynamicRenderProps = Context<unknown> &
+            React.RefAttributes<RenderActions<unknown>> & { metadata: TypedMessage['meta'] }
+        //#endregion
+        export type RenderActions<T> = {
+            /**
+             * This action make the render into the edit state.
+             * It should report the result via onEditComplete() props.
+             *
+             * If this action does not exist, it will be rendered as non-editable.
+             */
+            edit?(): void
+            /**
+             * This action make the render quit the edit state.
+             * If save is true, the render MUST report the new result via onEditComplete.
+             *
+             * If this action does not exist, the render should handle the save/cancel by themself.
+             */
+            quitEdit?(save: boolean): void
+        }
+        export type Context<T> = CompositionContext<T> | DecryptedPostContext
+        /** This metadata render is called in a composition preview context. */
+        export interface CompositionContext<T> {
+            context: 'composition'
+            /**
+             * When edit() is called, this component should go into to editable state.
+             * If the edit completes, the new metadata will be used to replace the old one.
+             */
+            onEditComplete(metaKey: string, replaceMeta: T): void
+        }
+        /**
+         * This metadat render is called in the decrypted post.
+         */
+        export interface DecryptedPostContext {
+            context: 'post'
+        }
     }
 }
 
@@ -346,6 +435,7 @@ export enum CurrentSNSNetwork {
     Facebook = 1,
     Twitter = 2,
     Instagram = 3,
+    Minds = 4,
 }
 
 /**
