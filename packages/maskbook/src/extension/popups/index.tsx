@@ -13,6 +13,7 @@ export enum DialogRoutes {
     BackupWallet = '/wallet/backup',
     AddToken = '/wallet/addToken',
     TokenDetail = '/wallet/tokenDetail',
+    Transfer = '/wallet/transfer',
     Personas = '/personas',
     PermissionAwareRedirect = '/redirect',
     RequestPermission = '/request-permission',
