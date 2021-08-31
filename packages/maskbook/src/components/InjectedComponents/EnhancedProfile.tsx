@@ -5,6 +5,7 @@ import { Box, Link, Typography } from '@material-ui/core'
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined'
 import { useState, useEffect } from 'react'
 import { CollectibleListAddress } from '../../extension/options-page/DashboardComponents/CollectibleList'
+import { useDomainFromTwitterHandle } from '../../plugins/Wallet/hooks/useDomainENS'
 import { useEthereumAddress } from '../../social-network-adaptor/twitter.com/injection/useEthereumName'
 import { MaskMessage } from '../../utils'
 import { useLocationChange } from '../../utils/hooks/useLocationChange'
@@ -68,7 +69,15 @@ export function EnhancedProfilePage(props: EnhancedProfilePageProps) {
         })
     }, [])
 
+    const domain = useDomainFromTwitterHandle(twitterId)
+
+    console.log(`DEBUG: domain of ${twitterId}`)
+    console.log({
+        domain,
+    })
+
     const { name, addressENS, addressUNS, address } = useEthereumAddress(nickname, twitterId, bioDescription)
+
     const address_ = addressENS ?? addressUNS ?? address ?? ''
     if (!show || !address_) return null
     return (
