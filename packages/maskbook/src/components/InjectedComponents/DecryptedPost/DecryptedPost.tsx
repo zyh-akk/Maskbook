@@ -1,8 +1,7 @@
 import { Fragment, useEffect, useMemo, useReducer, useState } from 'react'
-import { makeTypedMessageTuple, TypedMessageTuple, or } from '@masknet/shared'
+import { makeTypedMessageTuple, TypedMessageTuple, or, delay } from '@masknet/shared'
 import { unreachable } from '@dimensiondev/kit'
 
-import { delay } from '../../../utils/utils'
 import { ServicesWithProgress } from '../../../extension/service'
 import type { Profile } from '../../../database'
 import type { ProfileIdentifier } from '../../../database/type'

@@ -1,6 +1,7 @@
 import { Suspense, useMemo } from 'react'
 import type { Plugin } from '@masknet/plugin-infra'
 import { SnackbarContent } from '@material-ui/core'
+import { parseURL } from '@masknet/shared'
 import MaskbookPluginWrapper from '../../MaskbookPluginWrapper'
 import { extractTextFromTypedMessage } from '../../../protocols/typed-message'
 import { usePostInfoDetails } from '../../../components/DataSource/usePostInfo'
@@ -8,7 +9,6 @@ import { PreviewCard } from './PreviewCard'
 import { base } from '../base'
 import { PLUGIN_NAME, PLUGIN_META_KEY } from '../constants'
 import { DonateDialog } from './DonateDialog'
-import { parseURL } from '../../../utils/utils'
 
 const isGitcoin = (x: string): boolean => /^https:\/\/gitcoin.co\/grants\/\d+/.test(x)
 

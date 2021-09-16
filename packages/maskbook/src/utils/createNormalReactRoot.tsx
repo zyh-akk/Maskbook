@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom'
-import { ErrorBoundary } from '../components/shared/ErrorBoundary'
+import { ErrorBoundary } from '@masknet/shared'
 import { NoEffectUsePortalShadowRootContext } from '@masknet/theme'
 
 export function createNormalReactRoot(jsx: JSX.Element, container?: HTMLElement) {

@@ -1,17 +1,16 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { Button, DialogActions, DialogContent } from '@material-ui/core'
 import { makeStyles } from '@masknet/theme'
 import { isEnvironment, Environment } from '@dimensiondev/holoflows-kit'
 import { ProviderType, useWallets, useWallet, NetworkType } from '@masknet/web3-shared'
-import { delay, useI18N } from '../../../utils'
-import { useRemoteControlledDialog, useStylesExtends } from '@masknet/shared'
+import { useRemoteControlledDialog, delay, useStylesExtends } from '@masknet/shared'
+import { useI18N } from '../../../utils'
 import { WalletMessages, WalletRPC } from '../messages'
 import { WalletInList } from '../../../components/shared/SelectWallet/WalletInList'
 import Services from '../../../extension/service'
 import { DashboardRoute } from '../../../extension/options-page/Route'
 import { InjectedDialog } from '../../../components/shared/InjectedDialog'
-import { useState } from 'react'
 
 const useStyles = makeStyles()({
     content: {

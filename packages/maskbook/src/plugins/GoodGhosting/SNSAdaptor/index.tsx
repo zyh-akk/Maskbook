@@ -1,7 +1,7 @@
 import { Suspense, useMemo } from 'react'
 import type { Plugin } from '@masknet/plugin-infra'
 import { SnackbarContent } from '@material-ui/core'
-import { parseURL } from '../../../utils/utils'
+import { parseURL } from '@masknet/shared'
 import MaskbookPluginWrapper from '../../MaskbookPluginWrapper'
 import { extractTextFromTypedMessage } from '../../../protocols/typed-message'
 import { usePostInfoDetails } from '../../../components/DataSource/usePostInfo'

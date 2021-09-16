@@ -1,5 +1,5 @@
 import { encodeText } from '@dimensiondev/kit'
-import { delay } from '../../utils/utils'
+import { delay } from '@masknet/shared'
 import { recover_ECDH_256k1_KeyPair_ByMnemonicWord } from '../../utils/mnemonic-code'
 import { createPersonaByJsonWebKey } from '../../database'
 import { attachProfileDB, LinkedProfileDetails } from '../../database/Persona/Persona.db'

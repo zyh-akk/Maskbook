@@ -1,8 +1,9 @@
-import { selectElementContents, delay } from '../../../utils/utils'
+import { delay } from '@masknet/shared'
+import { inputText, pasteText } from '@masknet/injected-script'
+import { selectElementContents } from '../../../utils/utils'
 import { isMobileFacebook } from '../utils/isMobile'
 import { MaskMessage } from '../../../utils/messages'
 import type { PostInfo } from '../../../social-network/PostInfo'
-import { inputText, pasteText } from '@masknet/injected-script'
 
 export async function pasteToCommentBoxFacebook(encryptedComment: string, current: PostInfo, dom: HTMLElement | null) {
     const fail = () => {

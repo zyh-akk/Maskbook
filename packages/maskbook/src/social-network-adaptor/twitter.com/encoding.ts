@@ -1,5 +1,6 @@
-import { batchReplace, parseURL, regexMatchAll } from '../../utils/utils'
+import { parseURL } from '@masknet/shared'
 import { isNull } from 'lodash-es'
+import { batchReplace, regexMatchAll } from '../../utils/utils'
 const ICAO9303Checksum = {
     encode: (input: string) => {
         return `${input}${(

@@ -4,7 +4,7 @@
 //
 // TODO: discuss about the superrare url format
 
-import { parseURL } from '../../utils/utils'
+import { parseURL } from '@masknet/shared'
 import {
     openseaHostname,
     openseaPathnameRegexMatcher,

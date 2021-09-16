@@ -1,7 +1,8 @@
 import { Button } from '@material-ui/core'
 import { Info as InfoIcon } from 'react-feather'
 import { useHistory } from 'react-router-dom'
-import { useQueryParams, useI18N, delay } from '../../../../utils'
+import { delay } from '@masknet/shared'
+import { useQueryParams, useI18N } from '../../../../utils'
 import { DashboardRoute } from '../../Route'
 import { DashboardDialogCore, DashboardDialogWrapper, WrappedDialogProps } from '../Base'
 

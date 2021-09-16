@@ -7,7 +7,6 @@ import { pasteImage } from '@masknet/injected-script'
 
 import { isNull, noop } from 'lodash-es'
 
-export { timeout, delay } from '@masknet/shared'
 /**
  * Download given url return as Blob
  */
@@ -122,7 +121,6 @@ export function addUint8Array(a: ArrayBuffer, b: ArrayBuffer) {
 
 import Services from '../extension/service'
 import { blobToArrayBuffer } from '@dimensiondev/kit'
-export { parseURL } from '@masknet/shared'
 /**
  * !!!! Please use the Promise constructor if possible
  * If you don't understand https://groups.google.com/forum/#!topic/bluebird-js/mUiX2-vXW2s

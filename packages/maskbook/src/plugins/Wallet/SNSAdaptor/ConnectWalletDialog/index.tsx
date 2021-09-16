@@ -12,9 +12,8 @@ import {
     resolveNetworkName,
     resolveProviderName,
 } from '@masknet/web3-shared'
+import { useRemoteControlledDialog, useStylesExtends, delay } from '@masknet/shared'
 import { InjectedDialog } from '../../../../components/shared/InjectedDialog'
-import { delay } from '../../../../utils'
-import { useRemoteControlledDialog, useStylesExtends } from '@masknet/shared'
 import { WalletMessages, WalletRPC } from '../../messages'
 import { ConnectionProgress } from './ConnectionProgress'
 import Services from '../../../../extension/service'

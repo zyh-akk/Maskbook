@@ -2,11 +2,11 @@ import { useCallback, useState } from 'react'
 import { DialogContent } from '@material-ui/core'
 import { makeStyles } from '@masknet/theme'
 import { FungibleTokenDetailed, useNativeTokenDetailed, useChainDetailed } from '@masknet/web3-shared'
+import { useRemoteControlledDialog, delay, useStylesExtends } from '@masknet/shared'
 import { InjectedDialog } from '../../../components/shared/InjectedDialog'
 import { FixedTokenList, FixedTokenListProps } from '../../../extension/options-page/DashboardComponents/FixedTokenList'
 import { WalletMessages } from '../../Wallet/messages'
-import { delay, useI18N } from '../../../utils'
-import { useRemoteControlledDialog, useStylesExtends } from '@masknet/shared'
+import { useI18N } from '../../../utils'
 import { SearchInput } from '../../../extension/options-page/DashboardComponents/SearchInput'
 
 const useStyles = makeStyles()((theme) => ({

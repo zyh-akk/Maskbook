@@ -16,7 +16,7 @@ import {
     useChainIdValid,
     useFungibleTokenBalance,
 } from '@masknet/web3-shared'
-import { useRemoteControlledDialog, useStylesExtends } from '@masknet/shared'
+import { useRemoteControlledDialog, useStylesExtends, delay } from '@masknet/shared'
 import { TradeForm } from './TradeForm'
 import { TradeRoute as UniswapTradeRoute } from '../uniswap/TradeRoute'
 import { TradeRoute as BalancerTradeRoute } from '../balancer/TradeRoute'
@@ -35,7 +35,6 @@ import { SelectTokenDialogEvent, WalletMessages } from '../../../Wallet/messages
 import { isNativeTokenWrapper } from '../../helpers'
 import { TradeContext } from '../../trader/useTradeContext'
 import { PluginTraderRPC } from '../../messages'
-import { delay } from '../../../../utils'
 
 const useStyles = makeStyles()((theme) => {
     return {

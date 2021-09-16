@@ -2,7 +2,7 @@ import { definedSocialNetworkUIs, loadSocialNetworkUI } from '../../social-netwo
 import { Flags } from '../../utils/flags'
 import { requestSNSAdaptorPermission } from '../../social-network/utils/permissions'
 
-import { delay } from '../../utils/utils'
+import { delay } from '@masknet/shared'
 import { currentSetupGuideStatus } from '../../settings/settings'
 import stringify from 'json-stable-stringify'
 import { SetupGuideStep } from '../../components/InjectedComponents/SetupGuide'

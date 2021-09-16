@@ -1,7 +1,8 @@
+import { delay } from '@masknet/shared'
 import { activatedSocialNetworkUI, SocialNetworkUI } from '../../index'
 import { untilDocumentReady } from '../../../utils/dom'
 import { MaskMessage } from '../../../utils/messages'
-import { delay, downloadUrl, pasteImageToActiveElements } from '../../../utils/utils'
+import { downloadUrl, pasteImageToActiveElements } from '../../../utils/utils'
 
 export function pasteImageToCompositionDefault(hasSucceed: () => Promise<boolean> | boolean) {
     return async function (

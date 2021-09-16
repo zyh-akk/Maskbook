@@ -1,7 +1,8 @@
 import { Typography } from '@material-ui/core'
 import { makeStyles } from '@masknet/theme'
+import { delay } from '@masknet/shared'
 import { DashboardDialogCore, WrappedDialogProps } from './Base'
-import { useI18N, delay } from '../../../utils'
+import { useI18N } from '../../../utils'
 import { QRCodeVideoScanner } from '../DashboardComponents/QRCodeVideoScanner'
 
 const useStyles = makeStyles()((theme) => ({

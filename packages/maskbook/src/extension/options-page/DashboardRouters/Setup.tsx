@@ -13,6 +13,7 @@ import {
     FormControlLabel,
 } from '@material-ui/core'
 import { makeStyles } from '@masknet/theme'
+import { delay, useStylesExtends } from '@masknet/shared'
 import { green } from '@material-ui/core/colors'
 import { useParams, useRouteMatch, Switch, Route, Redirect, Link, useHistory } from 'react-router-dom'
 
@@ -20,7 +21,6 @@ import {
     useQueryParams,
     useI18N,
     extraPermissions,
-    delay,
     Flags,
     extendsTheme,
     UpgradeBackupJSONFile,
@@ -38,7 +38,6 @@ import { Identifier, ECKeyIdentifier } from '../../../database/type'
 import { useMyPersonas, useMyUninitializedPersonas } from '../../../components/DataSource/useMyPersonas'
 import AbstractTab, { AbstractTabProps } from '../../../components/shared/AbstractTab'
 import { DashboardRoute } from '../Route'
-import { useStylesExtends } from '@masknet/shared'
 import type { Persona } from '../../../database'
 import { RestoreFromQRCodeImageBox } from '../DashboardComponents/RestoreFromQRCodeImageBox'
 import { RestoreFromBackupBox } from '../DashboardComponents/RestoreFromBackupBox'

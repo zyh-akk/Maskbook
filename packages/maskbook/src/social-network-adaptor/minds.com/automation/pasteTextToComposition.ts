@@ -1,8 +1,9 @@
+import { delay } from '@masknet/shared'
+import { inputText } from '@masknet/injected-script'
 import type { SocialNetworkUI } from '../../../social-network'
 import { untilElementAvailable } from '../../../utils/dom'
 import { MaskMessage } from '../../../utils/messages'
-import { delay, selectElementContents } from '../../../utils/utils'
-import { inputText } from '@masknet/injected-script'
+import { selectElementContents } from '../../../utils/utils'
 import { getEditorContent, hasEditor, hasFocus, isCompose } from '../utils/postBox'
 import { composeButtonSelector, postEditorDraftContentSelector } from '../utils/selector'
 
