@@ -593,7 +593,7 @@ importers:
       '@masknet/theme': link:../../theme
       '@masknet/web3-shared': link:../../web3-shared
       bignumber.js: 9.0.1
-      react-use: 17.3.1
+      react-use: 17.3.1_f991c289939c8299bed5e4a6a5a79a62
       web3-core: 1.5.2
 
   packages/plugins/example:
