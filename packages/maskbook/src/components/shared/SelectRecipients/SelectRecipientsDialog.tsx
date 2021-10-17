@@ -1,12 +1,10 @@
-import { useState, useMemo } from 'react'
-import Fuse from 'fuse.js'
-import { List, ListItem, ListItemText, Button, InputBase, DialogContent, DialogActions } from '@material-ui/core'
+import { useState, useCallback } from 'react'
+import { Button, InputBase, DialogContent, DialogActions } from '@material-ui/core'
 import { makeStyles } from '@masknet/theme'
 import { useI18N } from '../../../utils'
-import { useStylesExtends } from '@masknet/shared'
-import { ProfileInList } from './ProfileInList'
-import type { Profile } from '../../../database'
+import { ProfileIdentifier, useStylesExtends } from '@masknet/shared'
 import { InjectedDialog } from '../InjectedDialog'
+import { SelectProfileVirtualized } from './InfiniteLoader'
 
 const useStyles = makeStyles()((theme) => ({
     content: {
@@ -20,33 +18,30 @@ const useStyles = makeStyles()((theme) => ({
 
 export interface SelectRecipientsDialogUIProps extends withClasses<never> {
     open: boolean
-    items: Profile[]
-    selected: Profile[]
+    selected: ProfileIdentifier[]
     disabled: boolean
-    disabledItems?: Profile[]
     submitDisabled: boolean
     onSubmit: () => void
     onClose: () => void
-    onSelect: (item: Profile) => void
-    onDeselect: (item: Profile) => void
+    onSelect: (item: ProfileIdentifier) => void
+    onDeselect: (item: ProfileIdentifier) => void
 }
 export function SelectRecipientsDialogUI(props: SelectRecipientsDialogUIProps) {
     const { t } = useI18N()
     const classes = useStylesExtends(useStyles(), props)
-    const { items, disabledItems } = props
     const [search, setSearch] = useState('')
-    const itemsAfterSearch = useMemo(() => {
-        const fuse = new Fuse(items, {
-            keys: ['identifier.userId', 'linkedPersona.fingerprint', 'nickname'],
-            isCaseSensitive: false,
-            ignoreLocation: true,
-            threshold: 0,
-        })
 
-        return search === '' ? items : fuse.search(search).map((item) => item.item)
-    }, [search, items])
-    const LIST_ITEM_HEIGHT = 56
-
+    const isSelected = useCallback(
+        (id: ProfileIdentifier) => Boolean(props.selected.find((x) => x.equals(id))),
+        [props.selected],
+    )
+    const onChange = useCallback(
+        (id, status) => {
+            if (status) props.onSelect(id)
+            else props.onDeselect(id)
+        },
+        [props.onSelect, props.onDeselect],
+    )
     return (
         <InjectedDialog open={props.open} title={t('select_specific_friends_dialog__title')} onClose={props.onClose}>
             <DialogContent>
@@ -56,7 +51,13 @@ export function SelectRecipientsDialogUI(props: SelectRecipientsDialogUIProps) {
                     className={classes.input}
                     placeholder={t('search_box_placeholder')}
                 />
-                <List style={{ height: items.length * LIST_ITEM_HEIGHT }} dense>
+                <SelectProfileVirtualized
+                    search={search}
+                    disabled={props.disabled}
+                    onChange={onChange}
+                    isSelected={isSelected}
+                />
+                {/* <List style={{ height: items.length * LIST_ITEM_HEIGHT }} dense>
                     {itemsAfterSearch.length === 0 ? (
                         <ListItem>
                             <ListItemText primary={t('no_search_result')} />
@@ -82,7 +83,7 @@ export function SelectRecipientsDialogUI(props: SelectRecipientsDialogUIProps) {
                             />
                         ))
                     )}
-                </List>
+                </List> */}
             </DialogContent>
             <DialogActions>
                 <Button

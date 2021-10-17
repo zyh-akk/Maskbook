@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { ListItem, ListItemText, InputBase, Button, List, Box, Chip } from '@material-ui/core'
+import { ListItem, ListItemText, InputBase, List, Box } from '@material-ui/core'
 import { makeStyles } from '@masknet/theme'
 import { useI18N } from '../../../utils'
 import type { Profile } from '../../../database'
@@ -47,55 +47,27 @@ export function SelectProfileUI(props: SelectProfileUIProps) {
             !!(x.nickname || '').toLowerCase().match(search.toLowerCase())
         )
     })
-    const SelectAllButton = (
-        <Button
-            className={classes.buttons}
-            onClick={() => onSetSelected([...selected, ...listAfterSearch] as Profile[])}>
-            {t('select_all')}
-        </Button>
-    )
-    const SelectNoneButton = (
-        <Button className={classes.buttons} onClick={() => onSetSelected([])}>
-            {t('select_none')}
-        </Button>
-    )
-    const showSelectAll = listAfterSearch.length > 0
-    const showSelectNone = selected.length > 0
 
     return (
         <div className={classes.root}>
-            <Box
-                className={classes.selectedArea}
-                sx={{
-                    display: 'flex',
-                }}>
-                {frozenSelected.length === items.length || !listBeforeSearch.length ? (
-                    <Chip
-                        disabled={disabled}
-                        style={{ marginRight: 6, marginBottom: 6 }}
-                        color="primary"
-                        onDelete={frozenSelected.length !== items.length ? () => onSetSelected([]) : undefined}
-                        label={t('all_friends')}
-                    />
-                ) : (
-                    <>
-                        {frozenSelected.map((x) => FrozenChip(x))}
-                        {selected
-                            .filter((item) => !frozenSelected.includes(item as Profile))
-                            .map((item) => (
-                                <ProfileInChip
-                                    disabled={disabled}
-                                    key={item.identifier.toText()}
-                                    item={item}
-                                    onDelete={() =>
-                                        onSetSelected(
-                                            selected.filter((x) => !x.identifier.equals(item.identifier)) as Profile[],
-                                        )
-                                    }
-                                />
-                            ))}
-                    </>
-                )}
+            <Box sx={{ flex: 1 }}>
+                {frozenSelected.map((x) => FrozenChip(x))}
+                {selected
+                    .filter((item) => !frozenSelected.includes(item as Profile))
+                    .map((item) => (
+                        <ProfileInChip
+                            disabled={disabled}
+                            key={item.identifier.toText()}
+                            item={item}
+                            onDelete={() =>
+                                onSetSelected(
+                                    selected.filter((x) => !x.identifier.equals(item.identifier)) as Profile[],
+                                )
+                            }
+                        />
+                    ))}
+            </Box>
+            <Box className={classes.selectedArea} sx={{ display: 'flex' }}>
                 <InputBase
                     className={classes.input}
                     value={disabled ? '' : search}
@@ -109,17 +81,7 @@ export function SelectProfileUI(props: SelectProfileUIProps) {
                     disabled={disabled}
                 />
             </Box>
-            <Box
-                sx={{
-                    display: 'flex',
-                }}>
-                {showSelectAll && SelectAllButton}
-                {showSelectNone && SelectNoneButton}
-            </Box>
-            <Box
-                sx={{
-                    flex: 1,
-                }}>
+            <Box sx={{ flex: 1 }}>
                 <List dense>
                     {listBeforeSearch.length > 0 && listAfterSearch.length === 0 && search && (
                         <ListItem>

@@ -2,11 +2,11 @@ import { Box, Chip } from '@material-ui/core'
 import { makeStyles } from '@masknet/theme'
 import AddIcon from '@material-ui/icons/Add'
 import { useState } from 'react'
-import { difference } from 'lodash-es'
 import { useI18N } from '../../../utils'
 import type { Profile } from '../../../database'
 import { SelectRecipientsDialogUI } from './SelectRecipientsDialog'
 import { useCurrentIdentity } from '../../DataSource/useActivatedUI'
+import type { ProfileIdentifier } from '@masknet/shared-base'
 
 const useStyles = makeStyles()({
     root: {
@@ -16,45 +16,37 @@ const useStyles = makeStyles()({
 })
 
 export interface SelectRecipientsUIProps {
-    items: Profile[]
-    selected: Profile[]
-    frozenSelected: Profile[]
+    selected: ProfileIdentifier[]
     disabled?: boolean
-    hideSelectAll?: boolean
-    hideSelectNone?: boolean
-    onSetSelected(selected: Profile[]): void
+    onSelect(selected: ProfileIdentifier[]): void
 }
 
 export function SelectRecipientsUI(props: SelectRecipientsUIProps) {
     const { t } = useI18N()
     const { classes } = useStyles()
-    const { items, selected, onSetSelected } = props
-    const currentIdentity = useCurrentIdentity()
-    const profileItems = items.filter(
-        (x) => !x.identifier.equals(currentIdentity?.identifier) && x.linkedPersona?.fingerprint,
-    )
+    const { selected, onSelect } = props
+    // const currentIdentity = useCurrentIdentity()
     const [open, setOpen] = useState(false)
 
     return (
         <Box className={classes.root}>
             <Chip
                 label={t('post_dialog__select_specific_e2e_target_title', {
-                    selected: new Set([...selected.map((x) => x.identifier.toText())]).size,
+                    selected: new Set([...selected.map((x) => x.toText())]).size,
                 })}
                 avatar={<AddIcon />}
-                disabled={props.disabled || profileItems.length === 0}
+                disabled={props.disabled}
                 onClick={() => setOpen(true)}
             />
             <SelectRecipientsDialogUI
                 open={open}
-                items={profileItems}
-                selected={profileItems.filter((x) => selected.includes(x))}
+                selected={selected}
                 disabled={false}
                 submitDisabled={false}
                 onSubmit={() => setOpen(false)}
                 onClose={() => setOpen(false)}
-                onSelect={(item) => onSetSelected([...selected, item])}
-                onDeselect={(item) => onSetSelected(difference(selected, [item]))}
+                onSelect={(item) => onSelect(selected.concat(item))}
+                onDeselect={(item) => onSelect(selected.filter((x) => !x.equals(item)))}
             />
         </Box>
     )

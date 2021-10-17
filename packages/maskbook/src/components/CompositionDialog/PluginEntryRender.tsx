@@ -8,7 +8,7 @@ import { Result } from 'ts-results'
 import { PluginI18NFieldRender, usePluginI18NField } from '../../plugin-infra/I18NFieldRender'
 import { RedPacketPluginID } from '../../plugins/RedPacket/constants'
 import { ITO_PluginID } from '../../plugins/ITO/constants'
-import { ClickableChip } from '../shared/SelectRecipients/ClickableChip'
+import { ClickableChip } from '../shared/ClickableChip'
 import { makeStyles } from '@masknet/theme'
 import { useCallback, useState, useRef, forwardRef, memo, useImperativeHandle } from 'react'
 

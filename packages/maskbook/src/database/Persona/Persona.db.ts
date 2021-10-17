@@ -76,7 +76,9 @@ const db = createDBAccessWithAsyncUpgrade<PersonaDB, Knowledge>(
                         db.createObjectStore('relations', { keyPath: ['linked', 'profile'] })
                         transaction
                             .objectStore('relations')
-                            .createIndex('linked, profile, favor', ['linked', 'profile', 'favor'], { unique: true })
+                            .createIndex('linked, profile, favor' as any, ['linked', 'profile', 'favor'], {
+                                unique: true,
+                            })
                     } catch {}
                 }
                 async function v3_v4() {
@@ -389,13 +391,14 @@ export async function queryProfilesDB(
     return result
 }
 
-const fuse = new Fuse([] as ProfileRecord[], {
-    shouldSort: true,
+const fuse = new Fuse([] as ProfileRecordDB[], {
     threshold: 0.45,
     minMatchCharLength: 1,
+    isCaseSensitive: false,
     keys: [
-        { name: 'nickname', weight: 0.8 },
-        { name: 'identifier.network', weight: 0.2 },
+        { name: 'nickname', weight: 0.7 },
+        { name: 'linkedPersona.compressedPoint', weight: 0.15 },
+        { name: 'identifier', weight: 0.15 },
     ],
 })
 
@@ -403,10 +406,24 @@ export async function queryProfilesPagedDB(
     options: {
         after?: ProfileIdentifier
         query?: string
+        network?: string
+        hasPublicKey?: boolean
+        isContactOf?: PersonaIdentifier
     },
     count: number,
 ): Promise<ProfileRecord[]> {
-    const t = createTransaction(await db(), 'readonly')('profiles')
+    const t = createTransaction(await db(), 'readonly')('profiles', 'relations')
+    // TODO: if you need to add a favor-first sort, please use the code below to bound the search range.
+    // TODO: you need to find all favored concats first (unfortunately)
+    // The "z" here means the upperBound is "z" (in alphabet order)
+    // since all identifier starts with "person:...", this is a good enough upperBound.
+
+    // for await (const i of t
+    //     .objectStore('relations')
+    //     .index('favor, profile, linked')
+    //     .iterate(IDBKeyRange.upperBound([-1, 'z', 'z']))) {
+    //     console.log(i)
+    // }
     const breakPoint = options.after?.toText()
     let firstRecord = true
     const data: ProfileRecord[] = []
@@ -420,13 +437,19 @@ export async function queryProfilesPagedDB(
         // after this record
         if (rec.key === breakPoint) continue
         if (count <= 0) break
-        const outData = profileOutDB(rec.value)
+
+        if (options.network && !rec.value.identifier.startsWith('person:' + options.network)) continue
+        if (options.hasPublicKey && !rec.value.linkedPersona) continue
+        if (options.isContactOf) {
+            const relation = await t.objectStore('relations').get([options.isContactOf.toText(), rec.key])
+            if (!relation) continue
+        }
         if (typeof options.query === 'string') {
-            fuse.setCollection([outData])
+            fuse.setCollection([rec.value])
             if (!fuse.search(options.query).length) continue
         }
         count -= 1
-        data.push(outData)
+        data.push(profileOutDB(rec.value))
     }
     return data
 }
@@ -701,10 +724,10 @@ export interface PersonaDB extends DBSchema {
     }
     /** Use inline keys **/
     relations: {
-        key: IDBValidKey[]
+        key: [linked: string, profile: string]
         value: RelationRecordDB
         indexes: {
-            'linked, profile, favor': [string, string, number]
+            // 'linked, profile, favor': [string, string, number]
             'favor, profile, linked': [number, string, string]
         }
     }

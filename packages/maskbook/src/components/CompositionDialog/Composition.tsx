@@ -3,7 +3,6 @@ import { useRef } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { activatedSocialNetworkUI, globalUIState } from '../../social-network'
 import { MaskMessages, useI18N } from '../../utils'
-import { useFriendsList as useRecipientsList } from '../DataSource/useActivatedUI'
 import { InjectedDialog } from '../shared/InjectedDialog'
 import { CompositionDialogUI, CompositionRef } from './CompositionUI'
 import { useCompositionClipboardRequest } from './useCompositionClipboardRequest'
@@ -59,7 +58,6 @@ export function Composition({ type = 'timeline', requireClipboardPermission }: P
                     <CompositionDialogUI
                         ref={UI}
                         {...useCompositionClipboardRequest(requireClipboardPermission || false)}
-                        recipients={useRecipientsList()}
                         maxLength={560}
                         onSubmit={useSubmit(onClose)}
                         supportImageEncoding={networkSupport?.text ?? false}

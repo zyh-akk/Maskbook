@@ -29,7 +29,7 @@ export function useSubmit(onClose: () => void) {
 
             const [encrypted, token] = await Services.Crypto.encryptTo(
                 content,
-                target === 'Everyone' ? [] : target.map((x) => x.identifier),
+                target === 'Everyone' ? [] : target,
                 whoAmI?.identifier ?? currentProfile,
                 target === 'Everyone',
             )

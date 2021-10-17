@@ -1,7 +1,7 @@
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState, startTransition, useCallback } from 'react'
 import { Typography, Chip, Button } from '@material-ui/core'
 import { LoadingButton } from '@material-ui/lab'
-import type { TypedMessage } from '@masknet/shared-base'
+import type { ProfileIdentifier, TypedMessage } from '@masknet/shared-base'
 import { useValueRef } from '@masknet/shared'
 import { makeStyles } from '@masknet/theme'
 import { Send } from '@material-ui/icons'
@@ -10,9 +10,8 @@ import { TypedMessageEditor, TypedMessageEditorRef } from './TypedMessageEditor'
 import { CharLimitIndicator } from './CharLimitIndicator'
 import { Flags, useI18N } from '../../utils'
 import { debugModeSetting } from '../../settings/settings'
-import { ClickableChip } from '../shared/SelectRecipients/ClickableChip'
+import { ClickableChip } from '../shared/ClickableChip'
 import { SelectRecipientsUI } from '../shared/SelectRecipients/SelectRecipients'
-import type { Profile } from '../../database'
 import { CompositionContext } from './CompositionContext'
 import { DebugMetadataInspector } from '../shared/DebugMetadataInspector'
 
@@ -43,7 +42,6 @@ export interface CompositionProps {
     onSubmit(data: SubmitComposition): Promise<void>
     onChange?(message: TypedMessage): void
     disabledRecipients?: undefined | 'E2E' | 'Everyone'
-    recipients: Profile[]
     // Enabled features
     supportTextEncoding: boolean
     supportImageEncoding: boolean
@@ -53,7 +51,7 @@ export interface CompositionProps {
     onRequestClipboardPermission?(): void
 }
 export interface SubmitComposition {
-    target: 'Everyone' | Profile[]
+    target: 'Everyone' | ProfileIdentifier[]
     content: TypedMessage
     encode: 'text' | 'image'
 }
@@ -189,12 +187,7 @@ export const CompositionDialogUI = forwardRef<CompositionRef, CompositionProps>(
                         onClick={() => setEncryptionKind('E2E')}
                     />
                     {recipientSelectorAvailable && (
-                        <SelectRecipientsUI
-                            disabled={sending}
-                            items={props.recipients}
-                            selected={recipients}
-                            onSetSelected={setRecipients}
-                        />
+                        <SelectRecipientsUI disabled={sending} selected={recipients} onSelect={setRecipients} />
                     )}
                 </div>
 
@@ -226,12 +219,11 @@ export const CompositionDialogUI = forwardRef<CompositionRef, CompositionProps>(
     )
 })
 
-function useSetEncryptionKind(props: Pick<CompositionProps, 'disabledRecipients' | 'recipients'>) {
+function useSetEncryptionKind(props: Pick<CompositionProps, 'disabledRecipients'>) {
     const [encryptionKind, setEncryptionKind] = useState<'Everyone' | 'E2E'>(
         props.disabledRecipients === 'Everyone' ? 'E2E' : 'Everyone',
     )
-    // TODO: Change to ProfileIdentifier
-    const [recipients, setRecipients] = useState<Profile[]>([])
+    const [recipients, setRecipients] = useState<ProfileIdentifier[]>([])
 
     const everyoneDisabled = props.disabledRecipients === 'Everyone'
     const E2EDisabled = props.disabledRecipients === 'E2E'
@@ -239,7 +231,7 @@ function useSetEncryptionKind(props: Pick<CompositionProps, 'disabledRecipients'
     const everyoneSelected = props.disabledRecipients !== 'Everyone' && (E2EDisabled || encryptionKind === 'Everyone')
     const _E2ESelected =
         props.disabledRecipients !== 'E2E' && (props.disabledRecipients === 'Everyone' || encryptionKind === 'E2E')
-    const recipientSelectorAvailable = Boolean(props.recipients.length && !everyoneSelected)
+    const recipientSelectorAvailable = !everyoneSelected
 
     return {
         recipients,

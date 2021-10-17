@@ -4,7 +4,6 @@ import { ListItemText, Checkbox, ListItemAvatar } from '@material-ui/core'
 import ListItemButton from '@material-ui/core/ListItemButton'
 import { makeStyles } from '@masknet/theme'
 import Highlighter from 'react-highlight-words'
-import { useStylesExtends } from '@masknet/shared'
 import type { DefaultComponentProps } from '@material-ui/core/OverridableComponent'
 import type { Profile } from '../../../database'
 import { Avatar } from '../../../utils/components/Avatar'
@@ -28,7 +27,7 @@ const useStyle = makeStyles()({
     },
 })
 
-export interface ProfileInListProps extends withClasses<never> {
+export interface ProfileInListProps {
     item: Profile
     search?: string
     checked?: boolean
@@ -38,7 +37,7 @@ export interface ProfileInListProps extends withClasses<never> {
     ListItemProps?: Partial<DefaultComponentProps<ListItemTypeMap<{ button: true }, 'div'>>>
 }
 export function ProfileInList(props: ProfileInListProps) {
-    const classes = useStylesExtends(useStyle(), props)
+    const { classes } = useStyle()
     const profile = props.item
     const name = profile.nickname || profile.identifier.userId
     const secondary = profile.linkedPersona?.fingerprint ? profile.linkedPersona?.fingerprint.toLowerCase() : ''
