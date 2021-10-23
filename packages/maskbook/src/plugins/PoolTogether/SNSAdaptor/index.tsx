@@ -1,14 +1,16 @@
-import { Suspense, useMemo } from 'react'
+import { Suspense, useMemo, useState } from 'react'
 import { Plugin, usePostInfoDetails } from '@masknet/plugin-infra'
 import { extractTextFromTypedMessage, parseURL } from '@masknet/shared'
 import { ChainId } from '@masknet/web3-shared-evm'
-import { SnackbarContent } from '@mui/material'
+import { DialogContent, SnackbarContent } from '@mui/material'
 import { base } from '../base'
 import MaskPluginWrapper from '../../MaskPluginWrapper'
 import { DepositDialog } from '../UI/DepositDialog'
 import { URL_PATTERN } from '../constants'
 import { PoolTogetherView } from '../UI/PoolTogetherView'
 import { EthereumChainBoundary } from '../../../web3/UI/EthereumChainBoundary'
+import { InjectedDialog } from '../../../components/shared/InjectedDialog'
+import { NewPoolTogetherView } from '../UI/NewPoolTogetherView'
 
 const isPoolTogetherUrl = (url: string) => URL_PATTERN.test(url)
 
@@ -37,6 +39,7 @@ const sns: Plugin.SNSAdaptor.Definition = {
 export default sns
 
 function Renderer(props: React.PropsWithChildren<{ url: string }>) {
+    const [open, setOpen] = useState(true)
     return (
         <MaskPluginWrapper pluginName="PoolTogether">
             <Suspense fallback={<SnackbarContent message="Mask is loading this plugin..." />}>
@@ -45,6 +48,11 @@ function Renderer(props: React.PropsWithChildren<{ url: string }>) {
                     isValidChainId={(chainId) => [ChainId.Mainnet, ChainId.Matic].includes(chainId)}>
                     <PoolTogetherView />
                 </EthereumChainBoundary>
+                <InjectedDialog title="PoolTogether" open={open} onClose={() => setOpen(false)}>
+                    <DialogContent>
+                        <NewPoolTogetherView />
+                    </DialogContent>
+                </InjectedDialog>
             </Suspense>
         </MaskPluginWrapper>
     )

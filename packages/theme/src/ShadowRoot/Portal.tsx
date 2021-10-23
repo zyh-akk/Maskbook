@@ -1,6 +1,7 @@
 import { useRef, useEffect, forwardRef, useState, createContext, useContext } from 'react'
 import { useCurrentShadowRootStyles } from './index'
 import type { PopperProps } from '@mui/material'
+import { applyMaskColorVars } from '../constants'
 
 /**
  * ! Do not export !
@@ -17,6 +18,9 @@ export function setupPortalShadowRoot(
     for (const each of preventEventPropagationList) {
         shadow.addEventListener(each, (e) => e.stopPropagation())
     }
+    const themeCSSVars = shadow.appendChild(document.createElement('style'))
+    const isDark = matchMedia('(prefers-color-scheme: dark)').matches
+    applyMaskColorVars(themeCSSVars, isDark ? 'dark' : 'light')
     mountingPoint = shadow.appendChild(document.createElement('div'))
 }
 

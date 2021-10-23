@@ -13,12 +13,13 @@ import {
 } from '@mui/material'
 import { makeStyles, useDialogStackActor } from '@masknet/theme'
 import { Children, cloneElement } from 'react'
-import { useI18N, usePortalShadowRoot } from '../../utils'
+import { useClassicMaskSNSTheme, useI18N, usePortalShadowRoot } from '../../utils'
 import { DialogDismissIconUI } from '../InjectedComponents/DialogDismissIcon'
 import { ErrorBoundary, useStylesExtends, mergeClasses } from '@masknet/shared'
 import { activatedSocialNetworkUI } from '../../social-network'
 import { MINDS_ID } from '../../social-network-adaptor/minds.com/base'
 import { FACEBOOK_ID } from '../../social-network-adaptor/facebook.com/base'
+import { MaskUIRoot } from '../../UIRoot'
 
 interface StyleProps {
     snsId: string
@@ -85,51 +86,55 @@ export function InjectedDialog(props: InjectedDialogProps) {
     const { extraProps, shouldReplaceExitWithBack, IncreaseStack } = useDialogStackActor(open)
 
     return usePortalShadowRoot((container) => (
-        <IncreaseStack>
-            <Dialog
-                container={container}
-                fullScreen={fullScreen}
-                classes={dialogClasses}
-                scroll="paper"
-                fullWidth
-                maxWidth="sm"
-                disableAutoFocus
-                disableEnforceFocus
-                onClose={(event, reason) => {
-                    if (reason === 'backdropClick' && disableBackdropClick) return
-                    onClose?.()
-                }}
-                onBackdropClick={disableBackdropClick ? void 0 : onClose}
-                BackdropProps={{
-                    classes: {
-                        root: dialogBackdropRoot,
-                    },
-                }}
-                {...rest}
-                {...extraProps}>
-                <ErrorBoundary>
-                    {title ? (
-                        <DialogTitle className="dashboard-dialog-title-hook" classes={{ root: dialogTitle }}>
-                            <IconButton
-                                size="large"
-                                classes={{ root: dialogCloseButton }}
-                                aria-label={t('post_dialog__dismiss_aria')}
-                                onClick={onClose}>
-                                <DialogDismissIconUI style={shouldReplaceExitWithBack ? 'back' : titleBarIconStyle} />
-                            </IconButton>
-                            <Typography className={dialogTitleTypography} display="inline" variant="inherit">
-                                {title}
-                            </Typography>
-                        </DialogTitle>
-                    ) : null}
-                    {/* There is a .MuiDialogTitle+.MuiDialogContent selector that provides paddingTop: 0 */}
-                    {/* Add an empty span here to revert this effect. */}
-                    <span />
-                    {content}
-                    {actions}
-                </ErrorBoundary>
-            </Dialog>
-        </IncreaseStack>
+        <MaskUIRoot useTheme={useClassicMaskSNSTheme} kind="sns">
+            <IncreaseStack>
+                <Dialog
+                    container={container}
+                    fullScreen={fullScreen}
+                    classes={dialogClasses}
+                    scroll="paper"
+                    fullWidth
+                    maxWidth="sm"
+                    disableAutoFocus
+                    disableEnforceFocus
+                    onClose={(event, reason) => {
+                        if (reason === 'backdropClick' && disableBackdropClick) return
+                        onClose?.()
+                    }}
+                    onBackdropClick={disableBackdropClick ? void 0 : onClose}
+                    BackdropProps={{
+                        classes: {
+                            root: dialogBackdropRoot,
+                        },
+                    }}
+                    {...rest}
+                    {...extraProps}>
+                    <ErrorBoundary>
+                        {title ? (
+                            <DialogTitle className="dashboard-dialog-title-hook" classes={{ root: dialogTitle }}>
+                                <IconButton
+                                    size="large"
+                                    classes={{ root: dialogCloseButton }}
+                                    aria-label={t('post_dialog__dismiss_aria')}
+                                    onClick={onClose}>
+                                    <DialogDismissIconUI
+                                        style={shouldReplaceExitWithBack ? 'back' : titleBarIconStyle}
+                                    />
+                                </IconButton>
+                                <Typography className={dialogTitleTypography} display="inline" variant="inherit">
+                                    {title}
+                                </Typography>
+                            </DialogTitle>
+                        ) : null}
+                        {/* There is a .MuiDialogTitle+.MuiDialogContent selector that provides paddingTop: 0 */}
+                        {/* Add an empty span here to revert this effect. */}
+                        <span />
+                        {content}
+                        {actions}
+                    </ErrorBoundary>
+                </Dialog>
+            </IncreaseStack>
+        </MaskUIRoot>
     ))
 }
 function CopyElementWithNewProps<T>(
