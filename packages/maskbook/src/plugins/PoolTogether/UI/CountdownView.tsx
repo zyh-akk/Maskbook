@@ -27,6 +27,8 @@ const useStyles = makeStyles()((theme) => ({
         borderRadius: theme.spacing(0.5),
         color: '#6cf5db',
         width: '50%',
+        fontSize: 16,
+        lineHeight: '22px',
     },
     placeholder: {
         display: 'flex',
@@ -35,6 +37,10 @@ const useStyles = makeStyles()((theme) => ({
     },
     label: {
         color: '#a69bbc',
+        fontSize: 16,
+        lineHeight: '22px',
+        fontWeight: 600,
+        marginTop: theme.spacing(1),
     },
     separator: {
         color: '#6cf5db',
@@ -82,7 +88,7 @@ export const CountdownView = (props: CountdownProps) => {
 
     const Digit = (props: DigitProps) => {
         return (
-            <Typography variant="body1" fontWeight="fontWeightBold">
+            <Typography p="10px" fontWeight="fontWeightBold">
                 {props.digit}
             </Typography>
         )
@@ -119,9 +125,7 @@ export const CountdownView = (props: CountdownProps) => {
                     <RightDigit digit={rightDigit} />
                 </Box>
                 <Box>
-                    <Typography variant="subtitle2" fontSize={8} className={classes.label}>
-                        {label}
-                    </Typography>
+                    <Typography className={classes.label}>{label}</Typography>
                 </Box>
             </>
         )
@@ -130,7 +134,7 @@ export const CountdownView = (props: CountdownProps) => {
     const Separator = () => {
         return (
             <Grid container item direction="column" className={classes.separator}>
-                <Box py={0.2}>
+                <Box py="10px">
                     <Typography variant="body2" fontWeight="fontWeightBold">
                         :
                     </Typography>
