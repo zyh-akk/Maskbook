@@ -122,6 +122,7 @@ importers:
       '@masknet/plugin-example': workspace:*
       '@masknet/plugin-flow': workspace:*
       '@masknet/plugin-infra': workspace:*
+      '@masknet/plugin-solana': workspace:*
       '@masknet/plugin-wallet': workspace:*
       '@masknet/public-api': workspace:*
       '@masknet/shared': workspace:*
@@ -173,6 +174,7 @@ importers:
       '@masknet/plugin-example': link:../plugins/example
       '@masknet/plugin-flow': link:../plugins/Flow
       '@masknet/plugin-infra': link:../plugin-infra
+      '@masknet/plugin-solana': link:../plugins/Solana
       '@masknet/plugin-wallet': link:../plugins/Wallet
       '@masknet/public-api': link:../public-api
       '@masknet/shared': link:../shared
@@ -268,6 +270,7 @@ importers:
       '@masknet/plugin-example': workspace:*
       '@masknet/plugin-flow': workspace:*
       '@masknet/plugin-infra': workspace:*
+      '@masknet/plugin-solana': workspace:*
       '@masknet/plugin-wallet': workspace:*
       '@masknet/public-api': workspace:*
       '@masknet/sdk': workspace:*
@@ -405,6 +408,7 @@ importers:
       '@masknet/plugin-example': link:../plugins/example
       '@masknet/plugin-flow': link:../plugins/Flow
       '@masknet/plugin-infra': link:../plugin-infra
+      '@masknet/plugin-solana': link:../plugins/Solana
       '@masknet/plugin-wallet': link:../plugins/Wallet
       '@masknet/public-api': link:../public-api
       '@masknet/sdk': link:../mask-sdk
@@ -586,6 +590,26 @@ importers:
       bignumber.js: 9.0.1
       lodash-es: 4.17.21
       react-use: 17.3.1
+
+  packages/plugins/Solana:
+    specifiers:
+      '@masknet/icons': workspace:*
+      '@masknet/plugin-infra': workspace:*
+      '@masknet/shared': workspace:*
+      '@masknet/shared-base': workspace:*
+      '@masknet/theme': workspace:*
+      '@masknet/web3-shared-flow': workspace:*
+      bignumber.js: ^9.0.1
+      react-use: ^17.3.1
+    dependencies:
+      '@masknet/icons': link:../../icons
+      '@masknet/plugin-infra': link:../../plugin-infra
+      '@masknet/shared': link:../../shared
+      '@masknet/shared-base': link:../../shared-base
+      '@masknet/theme': link:../../theme
+      '@masknet/web3-shared-flow': link:../../web3-shared/flow
+      bignumber.js: 9.0.1
+      react-use: 17.3.1_9a9fcfd9691ee39f83ac00f4a3221da4
 
   packages/plugins/Wallet:
     specifiers:
@@ -875,7 +899,18 @@ importers:
       react-use: 17.3.1
 
   packages/web3-shared/solana:
-    specifiers: {}
+    specifiers:
+      '@masknet/web3-constants': workspace:*
+      '@masknet/web3-kit': workspace:*
+      '@onflow/fcl': ^0.0.77
+      '@onflow/types': ^0.0.5
+      react-use: ^17.3.1
+    dependencies:
+      '@masknet/web3-constants': link:../../web3-constants
+      '@masknet/web3-kit': link:../../web3-kit
+      '@onflow/fcl': 0.0.77
+      '@onflow/types': 0.0.5
+      react-use: 17.3.1_9a9fcfd9691ee39f83ac00f4a3221da4
 
 packages:
 

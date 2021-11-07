@@ -1,0 +1,16 @@
+{
+  "name": "@masknet/plugin-solana",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "@masknet/icons": "workspace:*",
+    "@masknet/plugin-infra": "workspace:*",
+    "@masknet/shared": "workspace:*",
+    "@masknet/shared-base": "workspace:*",
+    "@masknet/theme": "workspace:*",
+    "@masknet/web3-shared-flow": "workspace:*",
+    "bignumber.js": "^9.0.1",
+    "react-use": "^17.3.1"
+  }
+}

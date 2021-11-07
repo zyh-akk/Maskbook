@@ -2,8 +2,9 @@
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "rootDir": "./",
-    "outDir": "../dist/solana",
-    "tsBuildInfoFile": "../dist/solana.tsbuildinfo"
+    "outDir": "../dist/flow",
+    "tsBuildInfoFile": "../dist/flow.tsbuildinfo"
   },
-  "include": ["./", "./**/*.json"]
+  "include": ["./", "./**/*.json"],
+  "references": [{ "path": "../../web3-kit" }]
 }

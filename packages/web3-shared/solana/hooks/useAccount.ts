@@ -1,7 +1,7 @@
 import type { Account } from '@onflow/fcl'
 import { useAsyncRetry } from 'react-use'
-import { useCurrentUser } from './useCurrentUser'
 import { useFCL } from './useFCL'
+import { useCurrentUser } from './useCurrentUser'
 
 export function useAccount() {
     const fcl = useFCL()

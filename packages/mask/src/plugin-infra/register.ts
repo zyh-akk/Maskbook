@@ -3,6 +3,7 @@
 
 import '@masknet/plugin-example'
 import '@masknet/plugin-flow'
+import '@masknet/plugin-solana'
 import '../plugins/Wallet'
 import '../plugins/RedPacket'
 import '../plugins/ITO'
