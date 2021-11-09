@@ -7,5 +7,6 @@ export const maskSDKServer: BridgeAPI = {
         const result = await Services.Identity.signWithPersona({ message: String(message), method: 'eth' })
         return result.signature.signature
     },
+    async eth_sendRequest(url, message) {},
     ...SNSMethods,
 }

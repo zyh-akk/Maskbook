@@ -1,4 +1,5 @@
 import { readyPromise } from './bridge'
+import { Ethereum } from './ethereum'
 import { persona } from './persona'
 import { SocialNetwork } from './socialNetwork'
 
@@ -7,7 +8,7 @@ readyPromise.then((init) => {
     const MaskSDK: typeof Mask = {
         sdkVersion: 0,
         credentials: {} as any,
-        ethereum: {} as any,
+        ethereum: new Ethereum(),
         socialNetwork: new SocialNetwork(init),
         persona,
     }

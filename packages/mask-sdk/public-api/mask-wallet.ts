@@ -11,7 +11,7 @@ declare namespace Mask {
 declare namespace Mask.Ethereum {
     /** Extra APIs that only can be used with Mask Network is defined here. */
     export interface ExperimentalProvider {}
-    export interface Provider {
+    export interface Provider extends EventEmitter {
         /**
          * The `request` method is intended as a transport- and protocol-agnostic wrapper function for Remote Procedure Calls (RPCs).
          */
