@@ -146,6 +146,13 @@ export function createConfiguration(rawFlags: BuildFlags): Configuration {
                         },
                     },
                 },
+                // To support @solana/wallet-adapter-* packages. graphql/graphql-js#2721#issuecomment-723008284
+                {
+                    test: /\.m?js/,
+                    resolve: {
+                        fullySpecified: false,
+                    },
+                },
             ],
         },
         plugins: [

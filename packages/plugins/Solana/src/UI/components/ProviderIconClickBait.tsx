@@ -1,6 +1,8 @@
 import { useCallback, cloneElement, isValidElement } from 'react'
 import type { Plugin } from '@masknet/plugin-infra/src'
-import { NetworkType, ProviderType, useFCL } from '@masknet/web3-shared-flow'
+import { useWallet } from '@solana/wallet-adapter-react'
+import { WalletName } from '@solana/wallet-adapter-wallets'
+import type { NetworkType, ProviderType } from '@masknet/web3-shared-solana'
 
 export interface ProviderIconClickBaitProps {
     network: Plugin.Shared.Network
@@ -9,23 +11,25 @@ export interface ProviderIconClickBaitProps {
 }
 
 export function ProviderIconClickBait({ network, provider, children }: ProviderIconClickBaitProps) {
+    debugger
+    const wallet = useWallet()
+    const { connected, disconnected, connecting, connect, select, wallets, publicKey } = wallet
     const networkType = network.type as NetworkType
-    const providerType = network.type as ProviderType
+    const providerType = provider.type as ProviderType
 
-    const fcl = useFCL()
-    const onLogIn = useCallback(() => fcl.logIn(), [fcl])
-    const onClick = useCallback(() => {
-        onLogIn()
-    }, [networkType, providerType, onLogIn])
+    const onClick = useCallback(async () => {
+        console.log('bait click', wallet)
+        debugger
+        select(WalletName.Sollet)
+        await connect()
+    }, [networkType, providerType, select, connect, wallet])
 
     return (
         <>
             {isValidElement<object>(children)
                 ? cloneElement(children, {
                       ...children.props,
-                      ...{
-                          onClick,
-                      },
+                      onClick,
                   })
                 : children}
         </>

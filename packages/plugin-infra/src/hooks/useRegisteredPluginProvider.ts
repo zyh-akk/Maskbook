@@ -1,4 +1,4 @@
-import { useRegisteredPlugin } from '.'
+import { useRegisteredPlugin } from './useRegisteredPlugin'
 
 export function useRegisteredPluginProvider(pluginID: string, providerTypeOrID?: string) {
     return useRegisteredPlugin(pluginID)?.providers?.find(

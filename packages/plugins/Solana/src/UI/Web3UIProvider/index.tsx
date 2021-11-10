@@ -1,5 +1,5 @@
 import type { Plugin } from '@masknet/plugin-infra'
-import { useNetworkType, useProviderType } from '@masknet/web3-shared-flow'
+import { useNetworkType, useProviderType } from '@masknet/web3-shared-solana'
 import { PLUGIN_NETWORKS, PLUGIN_PROVIDERS } from '../../constants'
 import { ProviderIconClickBait } from '../components/ProviderIconClickBait'
 

@@ -45,6 +45,7 @@ export function SelectProviderDialog(props: SelectProviderDialogProps) {
     //#endregion
 
     const pluginID = useValueRef(pluginIDSettings)
+    // const pluginID = 'com.maskbook.solana'
     const networkID = useValueRef(networkIDSettings)
     const [undeterminedPluginID, setUndeterminedPluginID] = useState(pluginID)
     const [undeterminedNetworkID, setUndeterminedNetworkID] = useState(networkID)

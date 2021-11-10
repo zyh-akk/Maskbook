@@ -17,7 +17,7 @@ export const PLUGIN_NETWORKS: Plugin.Shared.Network[] = [
 ]
 export const PLUGIN_PROVIDERS: Plugin.Shared.Provider[] = [
     {
-        ID: `${PLUGIN_ID}_blocto`,
+        ID: `${PLUGIN_ID}_phantom`,
         pluginID: PLUGIN_ID,
         type: ProviderType.Phantom,
         name: 'Blocto',

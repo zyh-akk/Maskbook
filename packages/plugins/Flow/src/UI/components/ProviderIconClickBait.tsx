@@ -10,7 +10,7 @@ export interface ProviderIconClickBaitProps {
 
 export function ProviderIconClickBait({ network, provider, children }: ProviderIconClickBaitProps) {
     const networkType = network.type as NetworkType
-    const providerType = network.type as ProviderType
+    const providerType = provider.type as ProviderType
 
     const fcl = useFCL()
     const onLogIn = useCallback(() => fcl.logIn(), [fcl])

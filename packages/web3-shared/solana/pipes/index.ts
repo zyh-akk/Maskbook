@@ -5,7 +5,7 @@ export const resolveChainName = createLookupTableResolver<ChainId, string>(
     {
         [ChainId.MainnetBeta]: 'mainnet-beta',
         [ChainId.Testnet]: 'testnet',
-        [ChainId.Devenet]: 'devnet',
+        [ChainId.Devnet]: 'devnet',
     },
     () => 'Unknown chain id',
 )
@@ -13,6 +13,7 @@ export const resolveChainName = createLookupTableResolver<ChainId, string>(
 export const resolveProviderName = createLookupTableResolver<ProviderType, string>(
     {
         [ProviderType.Phantom]: 'Phantom',
+        [ProviderType.Sollet]: 'Sollet',
     },
     () => 'Unknown provider type',
 )

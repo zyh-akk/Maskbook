@@ -10,4 +10,5 @@ export enum NetworkType {
 
 export enum ProviderType {
     Phantom = 'Phantom',
+    Sollet = 'Sollet',
 }
