@@ -1,9 +1,9 @@
 import { WalletRPC } from '../messages'
 import { useAsyncRetry } from 'react-use'
 
-export function useNFTscanFindAssets(account: string, disabled = false) {
+export function useGetAssets(account: string, disabled = false) {
     return useAsyncRetry(async () => {
         if (!account || disabled) return null
-        return WalletRPC.nftscanFindAssets(account)
+        return WalletRPC.getAssets(account)
     }, [account, disabled])
 }

@@ -6,6 +6,7 @@ import {
     createERC721Token,
     createERC721ContractDetailed,
     formatEthereumAddress,
+    isSameAddress,
 } from '@masknet/web3-shared-evm'
 const NFTSCAN_TOKEN_ID = 'bcaa7c6850d2489e8cb0247e0abdce50'
 const CORS_PROXY = 'https://whispering-harbor-49523.herokuapp.com'
@@ -51,6 +52,49 @@ function createERC721TokenAsset(asset: NFTAsset) {
         },
         asset.token_id,
     )
+}
+
+async function getContractsAndBalance(address: string) {
+    const response = await fetch(`${CORS_PROXY}/${BASE_API}/getGroupByNftContract`, {
+        headers: {
+            'content-type': 'application/json',
+            Authorization: NFTSCAN_TOKEN_ID,
+        },
+        method: 'POST',
+        body: JSON.stringify({
+            erc: 'erc721',
+            user_address: address,
+        }),
+    })
+
+    if (!response.ok) return null
+
+    type NFTContractResponse = {
+        nft_asset: NFTAsset[]
+        nft_asset_count: number
+        nft_contract_address: string
+        nft_platform_name: string
+    }
+
+    const { data }: { data: NFTContractResponse[] } = await response.json()
+
+    return data
+        .map((x) => {
+            const contractDetailed: ERC721ContractDetailed = {
+                name: x.nft_platform_name,
+                symbol: '',
+                address: x.nft_contract_address,
+                chainId: ChainId.Mainnet,
+                type: EthereumTokenType.ERC721,
+            }
+            const balance = x.nft_asset.length
+
+            return {
+                contractDetailed,
+                balance,
+            }
+        })
+        .sort((a, b) => a.balance - b.balance)
 }
 
 export async function findAssets(address: string) {
@@ -116,14 +160,14 @@ export async function getAsset(address: string, tokenId: string, chainId = Chain
 }
 
 export async function getAssets(from: string, chainId = ChainId.Mainnet) {
-    const tokens: ERC721TokenDetailed[] = []
+    let tokens: ERC721TokenDetailed[] = []
     let page = 0
     let assets
     const size = 50
     do {
         assets = await getAssetsPaged(from, { chainId, page, size })
         if (!assets) return []
-        tokens.concat(assets)
+        tokens = tokens.concat(assets)
         page = page + 1
     } while (assets.length === size)
 
@@ -152,4 +196,11 @@ export async function getAssetsPaged(from: string, opts: { chainId: ChainId; pag
         await response.json()
 
     return data.content.map((asset) => createERC721TokenAsset(asset))
+}
+
+export async function GetContractBalance(address: string, contract_address: string, chainId: ChainId) {
+    const response = await getContractsAndBalance(address)
+    if (!response) return
+
+    return response.find((x) => isSameAddress(x.contractDetailed.address, contract_address))?.balance
 }

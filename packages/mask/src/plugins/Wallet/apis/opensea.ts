@@ -1,4 +1,10 @@
-import { ChainId, createERC721ContractDetailed, createERC721Token, ERC721TokenDetailed } from '@masknet/web3-shared-evm'
+import {
+    ChainId,
+    createERC721ContractDetailed,
+    createERC721Token,
+    ERC721TokenDetailed,
+    isSameAddress,
+} from '@masknet/web3-shared-evm'
 import urlcat from 'urlcat'
 import { OPENSEA_API_KEY } from '../constants'
 
@@ -145,9 +151,7 @@ export async function getAssetsPaged(from: string, opts: { chainId?: ChainId; pa
     )
     if (!asset) return []
 
-    return (asset as AssetsListResponse).assets.map((asset: Asset) =>
-        createERC721TokenAsset(from, asset.token_id, chainId, asset),
-    )
+    return asset.assets.map((asset: Asset) => createERC721TokenAsset(from, asset.token_id, chainId, asset))
 }
 
 function createERC721ContractDetailedFromAssetContract(
@@ -174,7 +178,12 @@ function createERC721TokenAsset(address: string, tokenId: string, chainId: Chain
         {
             name: asset?.name ?? asset?.asset_contract.name ?? 'unknown name',
             description: asset?.description ?? asset?.asset_contract.symbol ?? 'unknown symbol',
-            image: asset?.image_url || asset?.image_preview_url || asset?.asset_contract.image_url || '',
+            image:
+                asset?.image_original_url ||
+                asset?.image_url ||
+                asset?.image_preview_url ||
+                asset?.asset_contract.image_url ||
+                '',
             owner: asset?.owner.address ?? '',
         },
         tokenId,
@@ -203,15 +212,21 @@ export async function getAsset(address: string, tokenId: string, chainId: ChainI
 }
 
 export async function getAssets(from: string, chainId: ChainId) {
-    const tokens: ERC721TokenDetailed[] = []
+    let tokens: ERC721TokenDetailed[] = []
     let page = 0
     let assets
     const size = 50
     do {
         assets = await getAssetsPaged(from, { chainId, page, size })
-        tokens.concat(assets)
+        tokens = tokens.concat(assets)
         page = page + 1
     } while (assets.length === size)
 
     return tokens
+}
+
+export async function GetContractBalance(address: string, contract_address: string, chainId: ChainId) {
+    const assets = await getAssets(address, chainId)
+
+    return assets.filter((x) => isSameAddress(x.contractDetailed.address, contract_address)).length
 }

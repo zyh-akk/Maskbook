@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { v4 as uuid } from 'uuid'
-import { ERC721ContractDetailed, useERC721ContractBalance, useAccount, isSameAddress } from '@masknet/web3-shared-evm'
+import { ERC721ContractDetailed, useERC721ContractBalance } from '@masknet/web3-shared-evm'
 import classNames from 'classnames'
 import { EthereumAddress } from 'wallet.ts'
 import { Box, Typography, CircularProgress } from '@mui/material'
@@ -9,7 +9,7 @@ import { useRemoteControlledDialog } from '@masknet/shared'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { SelectNftContractDialogEvent, WalletMessages } from '../../plugins/Wallet/messages'
 import { useI18N } from '../../utils'
-import { useNFTscanFindAssets } from '../../plugins/Wallet/hooks/useNFTscanFindAssets'
+import { useGetBalance } from '../../plugins/Wallet/hooks/useGetBalance'
 
 interface StyleProps {
     hasIcon: boolean
@@ -69,22 +69,21 @@ export interface ERC721TokenSelectPanelProps {
 }
 export function ERC721ContractSelectPanel(props: ERC721TokenSelectPanelProps) {
     const { onContractChange, onBalanceChange, contract } = props
-    const account = useAccount()
+    //   const account = useAccount()
+    const account = '0x0Bd793EA8334A77b2BfD604DbAEdca11eA094306'
     const { classes } = useStyles({ hasIcon: Boolean(contract?.iconURL) })
     const { value: balanceFromChain, loading: loadingFromChain } = useERC721ContractBalance(contract?.address, account)
-    const { value: assets, loading: loadingFromNFTscan } = useNFTscanFindAssets(account, !contract)
+    //const { value: assets, loading: loadingFromNFTscan } = useGetAssets(account, !contract)
 
     const { t } = useI18N()
 
-    const balanceFromNFTscan = assets
-        ? assets.find((asset) => isSameAddress(asset.contractDetailed.address, contract?.address))?.balance
-        : undefined
+    const { value: balanceFromNFTscan, loading: loadingBalanceFromNFTscan } = useGetBalance(account, contract?.address)
 
     const balance = balanceFromChain ? Number(balanceFromChain) : balanceFromNFTscan ?? 0
 
     onBalanceChange(balance)
 
-    const loading = (loadingFromChain || loadingFromNFTscan) && !balance
+    const loading = (loadingFromChain || loadingBalanceFromNFTscan) && !balance
 
     //#region select contract
     const [id] = useState(uuid())
