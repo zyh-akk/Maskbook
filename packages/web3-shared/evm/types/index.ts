@@ -494,6 +494,7 @@ export enum PortfolioProvider {
 
 export enum CollectibleProvider {
     OPENSEA = 0,
+    NFTSCAN = 1,
 }
 
 export type UnboxTransactionObject<T> = T extends NonPayableTransactionObject<infer R>

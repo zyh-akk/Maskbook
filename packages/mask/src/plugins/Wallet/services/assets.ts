@@ -4,7 +4,6 @@ import {
     ChainId,
     CollectibleProvider,
     createERC20Token,
-    createERC721Token,
     createNativeToken,
     CurrencyType,
     EthereumTokenType,
@@ -23,7 +22,6 @@ import BigNumber from 'bignumber.js'
 import { values } from 'lodash-es'
 import { EthereumAddress } from 'wallet.ts'
 import * as DebankAPI from '../apis/debank'
-import * as OpenSeaAPI from '../apis/opensea'
 import * as ZerionAPI from '../apis/zerion'
 import { resolveChainByScope, resolveZerionAssetsScopeName } from '../pipes'
 import type {
@@ -34,6 +32,7 @@ import type {
     ZerionAsset,
     ZerionCovalentAsset,
 } from '../types'
+import { getAssetsPaged } from './NFT/getAssetsPaged'
 
 export async function getAssetsListNFT(
     address: string,
@@ -42,38 +41,15 @@ export async function getAssetsListNFT(
     page?: number,
     size?: number,
 ): Promise<{ assets: ERC721TokenDetailed[]; hasNextPage: boolean }> {
-    if (provider === CollectibleProvider.OPENSEA) {
-        const { assets } = await OpenSeaAPI.getAssetsList(address, { chainId, page, size })
+    if (!EthereumAddress.isValid(address))
         return {
-            assets: assets
-                .filter(
-                    (x) =>
-                        ['non-fungible', 'semi-fungible'].includes(x.asset_contract.asset_contract_type) ||
-                        ['ERC721', 'ERC1155'].includes(x.asset_contract.schema_name),
-                )
-                .map((x) =>
-                    createERC721Token(
-                        {
-                            chainId: ChainId.Mainnet,
-                            type: EthereumTokenType.ERC721,
-                            name: x.asset_contract.name,
-                            symbol: x.asset_contract.symbol,
-                            address: x.asset_contract.address,
-                        },
-                        {
-                            name: x.name || x.asset_contract.name,
-                            description: x.description || x.asset_contract.symbol,
-                            image: x.image_url || x.image_preview_url || x.asset_contract.image_url || '',
-                        },
-                        x.token_id,
-                    ),
-                ),
-            hasNextPage: assets.length === size,
+            assets: [],
+            hasNextPage: false,
         }
-    }
+    const tokens = await getAssetsPaged(address, chainId, page, size)
     return {
-        assets: [],
-        hasNextPage: false,
+        assets: tokens,
+        hasNextPage: tokens.length === size,
     }
 }
 
