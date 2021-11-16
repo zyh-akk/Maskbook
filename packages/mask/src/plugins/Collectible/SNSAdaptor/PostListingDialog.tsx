@@ -5,9 +5,9 @@ import { useI18N } from '../../../utils'
 import { InjectedDialog } from '../../../components/shared/InjectedDialog'
 import { ListingByPriceCard } from './ListingByPriceCard'
 import { ListingByHighestBidCard } from './ListingByHighestBidCard'
-import type { useAsset } from '../hooks/useAsset'
 import { useChainId, useFungibleTokenWatched } from '@masknet/web3-shared-evm'
 import { first } from 'lodash-es'
+import type { useAsset } from '../../EVM/hooks/useAsset'
 
 const useStyles = makeStyles()((theme) => {
     return {

@@ -104,7 +104,9 @@ export function resolveCollectibleProviderLink(chainId: ChainId, provider: Colle
             if (chainId === ChainId.Rinkeby) return `https://testnets.opensea.io`
             return `https://opensea.io`
         case CollectibleProvider.NFTSCAN:
-            return `https://nftscan.com/`
+            return `https://nftscan.com`
+        case CollectibleProvider.RARIBLE:
+            return `https://rarible.com`
         default:
             unreachable(provider)
     }
@@ -118,6 +120,8 @@ export function resolveCollectibleAssetLink(chainId: ChainId, provider: Collecti
             return `https://opensea.io/assets`
         case CollectibleProvider.NFTSCAN:
             return `https://nftscan.com/search`
+        case CollectibleProvider.RARIBLE:
+            return 'https://rarible.com/token'
         default:
             unreachable(provider)
     }
@@ -132,6 +136,11 @@ export function resolveCollectibleLink(
         case CollectibleProvider.OPENSEA:
         case CollectibleProvider.NFTSCAN:
             return urlcat(resolveCollectibleAssetLink(chainId, provider), '/:address/:tokenId', {
+                address,
+                tokenId,
+            })
+        case CollectibleProvider.RARIBLE:
+            return urlcat(resolveCollectibleAssetLink(chainId, provider), '/:address::tokenId', {
                 address,
                 tokenId,
             })

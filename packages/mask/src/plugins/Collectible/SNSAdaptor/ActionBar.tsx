@@ -28,7 +28,7 @@ export function ActionBar(props: ActionBarProps) {
     const { t } = useI18N()
     const { classes } = useStyles()
     const account = useAccount()
-    const { asset, token } = CollectibleState.useContainer()
+    const { asset, assetOrder, token } = CollectibleState.useContainer()
 
     const {
         open: openCheckoutDialog,
@@ -56,7 +56,7 @@ export function ActionBar(props: ActionBarProps) {
                     {t('plugin_collectible_place_bid')}
                 </ActionButton>
             ) : null}
-            {!asset.value.is_owner && !asset.value.is_auction && asset.value?.order_ ? (
+            {!asset.value.is_owner && !asset.value.is_auction && asset.value?.desktopOrder ? (
                 <ActionButton
                     className={classes.button}
                     color="primary"
@@ -83,7 +83,12 @@ export function ActionBar(props: ActionBarProps) {
                     {t('plugin_collectible_sell')}
                 </ActionButton>
             ) : null}
-            <CheckoutDialog asset={asset} open={openCheckoutDialog} onClose={onCloseCheckoutDialog} />
+            <CheckoutDialog
+                asset={asset}
+                order={assetOrder}
+                open={openCheckoutDialog}
+                onClose={onCloseCheckoutDialog}
+            />
             <MakeOfferDialog asset={asset} open={openOfferDialog} onClose={onCloseOfferDialog} />
             <PostListingDialog asset={asset} open={openListingDialog} onClose={onCloseListingDialog} />
         </Box>

@@ -1,0 +1,5 @@
+export const PLUGIN_NAME = 'EVM'
+export const PLUGIN_ICON = ''
+export const PLUGIN_DESCRIPTION = 'EVM'
+export const PLUGIN_IDENTIFIER = 'com.maskbook.evm'
+export const PLUGIN_META_KEY = 'com.maskbook.evm:1'

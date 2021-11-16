@@ -47,9 +47,10 @@ export function OfferTab() {
             return (
                 offers.value?.some(
                     (item) =>
-                        (item.paymentTokenContract?.symbol !== 'WETH' && item.paymentTokenContract?.symbol !== 'ETH') ||
+                        (item.payment_token_contract?.symbol !== 'WETH' &&
+                            item.payment_token_contract?.symbol !== 'ETH') ||
                         (item.quantity && new BigNumber(item.quantity).toString() !== '1'),
-                ) && offers.value.filter((item) => isZero(item.expirationTime ?? 0)).length === 0
+                ) && offers.value.filter((item) => isZero(item.expiration_time ?? 0)).length === 0
             )
         } else {
             return false
@@ -114,7 +115,7 @@ export function OfferTab() {
                 </TableHead>
                 <TableBody>
                     {dataSource.map((order) => (
-                        <OrderRow key={order.hash} order={order} isDifferenceToken={isDifferenceToken} />
+                        <OrderRow key={order.order_hash} order={order} isDifferenceToken={isDifferenceToken} />
                     ))}
                 </TableBody>
                 {(provider === CollectibleProvider.OPENSEA && dataSource.length) || offerPage > 0 ? (

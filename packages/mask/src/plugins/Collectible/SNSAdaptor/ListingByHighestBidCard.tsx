@@ -17,9 +17,9 @@ import { ActionButtonPromise } from '../../../extension/options-page/DashboardCo
 import { SelectTokenAmountPanel } from '../../ITO/SNSAdaptor/SelectTokenAmountPanel'
 import { EthereumWalletConnectedBoundary } from '../../../web3/UI/EthereumWalletConnectedBoundary'
 import { DateTimePanel } from '../../../web3/UI/DateTimePanel'
-import type { useAsset } from '../hooks/useAsset'
 import { PluginCollectibleRPC } from '../messages'
 import { toAsset, toUnixTimestamp } from '../helpers'
+import type { useAsset } from '../../EVM/hooks/useAsset'
 
 const useStyles = makeStyles()((theme) => ({
     footer: {
@@ -78,7 +78,7 @@ export function ListingByHighestBidCard(props: ListingByHighestBidCardProps) {
                 asset: toAsset({
                     tokenId: asset.value.token_id,
                     tokenAddress: asset.value.token_address,
-                    schemaName: asset.value.asset_contract.schemaName,
+                    schemaName: asset.value.asset_contract?.schemaName,
                 }),
                 accountAddress: account,
                 startAmount: Number.parseFloat(amount),

@@ -1,58 +1,55 @@
 import { useRef, useState } from 'react'
-import { useUpdateEffect } from 'react-use'
 import { createContainer } from 'unstated-next'
 import { OrderSide } from 'opensea-js/lib/types'
 import { useValueRef } from '@masknet/shared'
 import { currentCollectibleProviderSettings } from '../settings'
 import { CollectibleTab, CollectibleToken } from '../types'
-import { useAsset } from './useAsset'
-import { useOrders } from './useOrders'
-import { useEvents } from './useEvents'
+import { useAsset, useHistory, useOrders } from '../../EVM/hooks'
+import { useAssetOrder } from './useAssetOrder'
 
 function useCollectibleState(token?: CollectibleToken) {
     const [tabIndex, setTabIndex] = useState(CollectibleTab.ARTICLE)
 
     const provider = useValueRef(currentCollectibleProviderSettings)
-    const asset = useAsset(provider, token)
+    const asset = useAsset(token?.contractAddress ?? '', token?.tokenId ?? '')
+
+    //#region asset order from sdk
+    const assetOrder = useAssetOrder(provider, token)
+    //#endregion
 
     //#region offers
     const [offerPage, setOfferPage] = useState(0)
-    const offers = useOrders(provider, tabIndex === CollectibleTab.OFFER ? token : undefined, OrderSide.Buy, offerPage)
+    const offers = useOrders(
+        tabIndex === CollectibleTab.OFFER ? token?.contractAddress : undefined,
+        tabIndex === CollectibleTab.OFFER ? token?.tokenId : undefined,
+        OrderSide.Buy,
+    )
     //#endregion
 
     //#region orders
     const [orderPage, setOrderPage] = useState(0)
     const orders = useOrders(
-        provider,
-        tabIndex === CollectibleTab.LISTING ? token : undefined,
+        tabIndex === CollectibleTab.LISTING ? token?.contractAddress : undefined,
+        tabIndex === CollectibleTab.LISTING ? token?.tokenId : undefined,
         OrderSide.Sell,
-        orderPage,
     )
     //#endregion
 
     //#region events
     const [eventPage, setEventPage] = useState(0)
     const cursors = useRef<string[]>([])
-    const events = useEvents(
-        provider,
-        tabIndex === CollectibleTab.HISTORY ? token : undefined,
-        cursors.current[eventPage - 1],
+    const events = useHistory(
+        tabIndex === CollectibleTab.HISTORY ? token?.contractAddress : undefined,
+        tabIndex === CollectibleTab.HISTORY ? token?.tokenId : undefined,
     )
-
-    useUpdateEffect(() => {
-        if (
-            events.value?.pageInfo.endCursor &&
-            !cursors.current.some((item) => events.value && item === events.value.pageInfo.endCursor)
-        ) {
-            cursors.current.push(events.value.pageInfo.endCursor)
-        }
-    }, [events, cursors])
     //#endregion
 
     return {
         token,
         asset,
         provider,
+
+        assetOrder,
 
         tabIndex,
         setTabIndex,

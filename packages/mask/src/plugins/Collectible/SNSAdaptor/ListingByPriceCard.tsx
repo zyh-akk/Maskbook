@@ -20,7 +20,7 @@ import { EthereumWalletConnectedBoundary } from '../../../web3/UI/EthereumWallet
 import { DateTimePanel } from '../../../web3/UI/DateTimePanel'
 import { PluginCollectibleRPC } from '../messages'
 import { toAsset, toUnixTimestamp } from '../helpers'
-import type { useAsset } from '../hooks/useAsset'
+import type { useAsset } from '../../EVM/hooks/useAsset'
 
 const useStyles = makeStyles()((theme) => {
     return {
@@ -107,7 +107,7 @@ export function ListingByPriceCard(props: ListingByPriceCardProps) {
                 asset: toAsset({
                     tokenId: asset.value.token_id,
                     tokenAddress: asset.value.token_address,
-                    schemaName: asset.value.asset_contract.schemaName,
+                    schemaName: asset.value.asset_contract?.schemaName,
                 }),
                 accountAddress: account,
                 startAmount: Number.parseFloat(amount),

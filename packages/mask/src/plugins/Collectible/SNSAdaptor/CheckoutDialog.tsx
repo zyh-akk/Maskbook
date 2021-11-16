@@ -20,10 +20,11 @@ import { useI18N } from '../../../utils'
 import { useRemoteControlledDialog } from '@masknet/shared'
 import ActionButton, { ActionButtonPromise } from '../../../extension/options-page/DashboardComponents/ActionButton'
 import { EthereumWalletConnectedBoundary } from '../../../web3/UI/EthereumWalletConnectedBoundary'
-import type { useAsset } from '../hooks/useAsset'
 import { PluginCollectibleRPC } from '../messages'
 import { PluginTraderMessages } from '../../Trader/messages'
 import { CheckoutOrder } from './CheckoutOrder'
+import type { useAsset } from '../../EVM/hooks/useAsset'
+import type { useAssetOrder } from '../hooks/useAssetOrder'
 
 const useStyles = makeStyles()((theme) => {
     return {
@@ -55,12 +56,13 @@ const useStyles = makeStyles()((theme) => {
 
 export interface CheckoutDialogProps {
     asset?: ReturnType<typeof useAsset>
+    order: ReturnType<typeof useAssetOrder>
     open: boolean
     onClose: () => void
 }
 
 export function CheckoutDialog(props: CheckoutDialogProps) {
-    const { asset, open, onClose } = props
+    const { asset, open, onClose, order } = props
     const isAuction = asset?.value?.is_auction ?? false
     const isVerified = asset?.value?.is_verified ?? false
 
@@ -76,10 +78,10 @@ export function CheckoutDialog(props: CheckoutDialogProps) {
     const onCheckout = useCallback(async () => {
         if (!asset?.value) return
         if (!asset.value.token_id || !asset.value.token_address) return
-        if (!asset.value.order_) return
+        if (!order.value) return
         try {
             await PluginCollectibleRPC.fulfillOrder({
-                order: asset.value.order_,
+                order: order.value,
                 accountAddress: account,
                 recipientAddress: account,
             })

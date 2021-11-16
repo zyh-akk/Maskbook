@@ -1,11 +1,11 @@
-import { WalletRPC } from '../messages'
 import { useAsyncRetry } from 'react-use'
 import { useChainId } from '@masknet/web3-shared-evm'
+import { PluginEVMRPC } from '../messages'
 
-export function useGetBalance(address: string, contract_address?: string) {
+export function useNFTBalance(address: string, contract_address?: string) {
     const chainId = useChainId()
     return useAsyncRetry(async () => {
         if (!contract_address) return
-        return WalletRPC.getBalance(address, contract_address, chainId)
+        return PluginEVMRPC.getNFTBalance(address, contract_address, chainId)
     }, [address, contract_address, chainId])
 }

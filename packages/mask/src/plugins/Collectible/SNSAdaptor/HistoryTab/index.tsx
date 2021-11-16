@@ -44,13 +44,13 @@ export function HistoryTab(props: HistoryTabProps) {
     //#region If there is a different asset, the unit price and quantity should be displayed
     const isDifferenceToken = useMemo(() => {
         if (provider === CollectibleProvider.OPENSEA)
-            return events.value?.data.some((item) => item.price?.asset?.symbol !== 'ETH')
+            return events.value?.some((item) => item.price?.asset?.asset_contract.symbol !== 'ETH')
         else return false
     }, [events.value, provider])
     //#endregion
 
     if (events.loading) return <LoadingTable />
-    if (!events.value || events.error || !events.value?.data.length)
+    if (!events.value || events.error || !events.value?.length)
         return (
             <Table size="small" stickyHeader>
                 <TableBody className={classes.empty}>
@@ -72,7 +72,7 @@ export function HistoryTab(props: HistoryTabProps) {
                     handlePrevClick={() => setEventPage((prev) => prev - 1)}
                     handleNextClick={() => setEventPage((prev) => prev + 1)}
                     prevDisabled={eventPage === 0}
-                    nextDisabled={!events.value?.pageInfo.hasNextPage}
+                    nextDisabled={false}
                     page={eventPage}
                     pageCount={10}
                 />
@@ -99,16 +99,16 @@ export function HistoryTab(props: HistoryTabProps) {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {events.value.data.map((order) => (
+                    {events.value.map((order) => (
                         <Row key={order.id} event={order} isDifferenceToken={isDifferenceToken} />
                     ))}
                 </TableBody>
-                {(provider === CollectibleProvider.OPENSEA && events.value.data.length) || eventPage > 0 ? (
+                {(provider === CollectibleProvider.OPENSEA && events.value.length) || eventPage > 0 ? (
                     <TableListPagination
                         handlePrevClick={() => setEventPage((prev) => prev - 1)}
                         handleNextClick={() => setEventPage((prev) => prev + 1)}
                         prevDisabled={eventPage === 0}
-                        nextDisabled={!events.value.pageInfo.hasNextPage}
+                        nextDisabled={false}
                         page={eventPage}
                         pageCount={10}
                     />

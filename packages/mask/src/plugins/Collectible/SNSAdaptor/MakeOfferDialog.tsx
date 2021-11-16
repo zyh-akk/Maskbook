@@ -29,12 +29,12 @@ import { UnreviewedWarning } from './UnreviewedWarning'
 import ActionButton, { ActionButtonPromise } from '../../../extension/options-page/DashboardComponents/ActionButton'
 import { SelectTokenAmountPanel } from '../../ITO/SNSAdaptor/SelectTokenAmountPanel'
 import { EthereumWalletConnectedBoundary } from '../../../web3/UI/EthereumWalletConnectedBoundary'
-import type { useAsset } from '../hooks/useAsset'
 import { DateTimePanel } from '../../../web3/UI/DateTimePanel'
 import { PluginCollectibleRPC } from '../messages'
 import { toAsset, toUnixTimestamp } from '../helpers'
 import { PluginTraderMessages } from '../../Trader/messages'
 import { Trans } from 'react-i18next'
+import type { useAsset } from '../../EVM/hooks/useAsset'
 
 const useStyles = makeStyles()((theme) => {
     return {
@@ -99,7 +99,7 @@ export function MakeOfferDialog(props: MakeOfferDialogProps) {
                 asset: toAsset({
                     tokenId: asset.value.token_id,
                     tokenAddress: asset.value.token_address,
-                    schemaName: asset.value.asset_contract.schemaName,
+                    schemaName: asset.value.asset_contract?.schemaName,
                 }),
                 accountAddress: account,
                 startAmount: Number.parseFloat(amount),

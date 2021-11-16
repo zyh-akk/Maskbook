@@ -21,6 +21,7 @@ import {
 import BigNumber from 'bignumber.js'
 import { values } from 'lodash-es'
 import { EthereumAddress } from 'wallet.ts'
+import { PluginEVMRPC } from '../../EVM/messages'
 import * as DebankAPI from '../apis/debank'
 import * as ZerionAPI from '../apis/zerion'
 import { resolveChainByScope, resolveZerionAssetsScopeName } from '../pipes'
@@ -32,7 +33,6 @@ import type {
     ZerionAsset,
     ZerionCovalentAsset,
 } from '../types'
-import { getAssetsPaged } from './NFT/getAssetsPaged'
 
 export async function getAssetsListNFT(
     address: string,
@@ -46,7 +46,7 @@ export async function getAssetsListNFT(
             assets: [],
             hasNextPage: false,
         }
-    const tokens = await getAssetsPaged(address, chainId, page, size)
+    const tokens = await PluginEVMRPC.getNFTsPaged(address, chainId, page, size)
     return {
         assets: tokens,
         hasNextPage: tokens.length === size,
