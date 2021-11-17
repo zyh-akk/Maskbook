@@ -1,10 +1,9 @@
 import Fuse from 'fuse.js'
 import { EthereumAddress } from 'wallet.ts'
-import { ERC20TokenDetailed, EthereumTokenType, formatEthereumAddress, isSameAddress } from '@masknet/web3-shared-evm'
+import { ERC20TokenDetailed, EthereumTokenType, isSameAddress } from '@masknet/web3-shared-evm'
 import { createTransaction } from '../../../../background/database/utils/openDB'
 import { createWalletDBAccess } from '../database/Wallet.db'
-import { WalletMessages } from '../messages'
-import { ERC20TokenRecordIntoDB, ERC20TokenRecordOutDB } from './helpers'
+import { ERC20TokenRecordOutDB } from './helpers'
 import type { ERC20TokenRecord } from '../database/types'
 import { queryTransactionPaged } from '../../../database/helpers/pagination'
 
@@ -55,25 +54,4 @@ export async function getERC20TokensPaged(index: number, count: number, query?: 
             ...x,
         }),
     )
-}
-
-/** @deprecated */
-export async function addERC20Token(token: ERC20TokenDetailed) {
-    const t = createTransaction(await createWalletDBAccess(), 'readwrite')('ERC20Token', 'Wallet')
-    await t.objectStore('ERC20Token').put(
-        ERC20TokenRecordIntoDB({
-            ...token,
-            name: token.name ?? '',
-            symbol: token.symbol ?? '',
-            decimals: token.decimals ?? 0,
-        }),
-    )
-    WalletMessages.events.erc20TokensUpdated.sendToAll(undefined)
-}
-
-/** @deprecated */
-export async function removeERC20Token(token: PartialRequired<ERC20TokenDetailed, 'address'>) {
-    const t = createTransaction(await createWalletDBAccess(), 'readwrite')('ERC20Token', 'Wallet')
-    await t.objectStore('ERC20Token').delete(formatEthereumAddress(token.address))
-    WalletMessages.events.erc20TokensUpdated.sendToAll(undefined)
 }
