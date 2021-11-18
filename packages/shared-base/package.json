@@ -18,6 +18,7 @@
     "immer": "^9.0.6",
     "lodash-es": "^4.17.21",
     "react": "../empty",
+    "safari-14-idb-fix": "^3.0.0",
     "ts-results": "^3.3.0",
     "typeson": "^6.1.0",
     "typeson-registry": "^1.0.0-alpha.38",
