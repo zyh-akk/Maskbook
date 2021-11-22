@@ -1,13 +1,13 @@
 import { memo, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useDashboardI18N } from '../../locales'
-import { Box } from '@material-ui/core'
+import { Box } from '@mui/material'
 import { MaskAlert } from '../MaskAlert'
 import { CodeValidation } from './CodeValidation'
 import { fetchBackupValue } from '../../pages/Settings/api'
-import { Services } from '../../API'
+import { Messages, Services } from '../../API'
 import BackupPreviewCard from '../../pages/Settings/components/BackupPreviewCard'
 import { ButtonContainer } from '../RegisterFrame/ButtonContainer'
-import { useSnackbar } from '@masknet/theme'
+import { useCustomSnackbar } from '@masknet/theme'
 import { useAsyncFn } from 'react-use'
 import { useNavigate } from 'react-router-dom'
 import { RoutePaths } from '../../type'
@@ -20,11 +20,12 @@ import { AccountType } from '../../pages/Settings/type'
 import { UserContext } from '../../pages/Settings/hooks/UserContext'
 import { ConfirmSynchronizePasswordDialog } from './ConfirmSynchronizePasswordDialog'
 import { LoadingButton } from '../LoadingButton'
+import type { BackupPreview } from '../../../../mask/src/utils'
 
 export const RestoreFromCloud = memo(() => {
     const t = useDashboardI18N()
     const navigate = useNavigate()
-    const { enqueueSnackbar } = useSnackbar()
+    const { showSnackbar } = useCustomSnackbar()
     const { user, updateUser } = useContext(UserContext)
     const { currentPersona, changeCurrentPersona } = PersonaContext.useContainer()
 
@@ -52,7 +53,7 @@ export const RestoreFromCloud = memo(() => {
 
     useEffect(() => {
         if (!fetchBackupValueError) return
-        enqueueSnackbar(t.sign_in_account_cloud_backup_download_failed(), { variant: 'error' })
+        showSnackbar(t.sign_in_account_cloud_backup_download_failed(), { variant: 'error' })
     }, [fetchBackupValueError])
 
     const onValidated = useCallback(
@@ -72,7 +73,7 @@ export const RestoreFromCloud = memo(() => {
                     name: 'restore',
                     params: {
                         backupJson: backupInfo.info,
-                        handleRestore: () => onRestore(backupInfo.id, { type, value: accountValue, password }),
+                        handleRestore: () => onRestore(backupInfo, { type, value: accountValue, password }),
                     },
                 })
                 return null
@@ -82,28 +83,37 @@ export const RestoreFromCloud = memo(() => {
         [],
     )
 
-    const onRestore = useCallback(
-        async (backupId: string, account: any) => {
-            try {
-                await Services.Welcome.checkPermissionsAndRestore(backupId)
+    const restoreCallback = useCallback(async () => {
+        if (!currentPersona) {
+            const lastedPersona = await Services.Identity.queryLastPersonaCreated()
+            if (lastedPersona) {
+                await changeCurrentPersona(lastedPersona.identifier)
+            }
+        }
+        if (account) {
+            if (!user.email && account.type === AccountType.email) {
+                updateUser({ email: account.value })
+            }
+            if (!user.phone && account.type === AccountType.phone) {
+                updateUser({ phone: account.value })
+            }
+        }
+        toggleSynchronizePasswordDialog(true)
+    }, [currentPersona, account, user, toggleSynchronizePasswordDialog])
 
-                if (!currentPersona) {
-                    const lastedPersona = await Services.Identity.queryLastPersonaCreated()
-                    if (lastedPersona) {
-                        await changeCurrentPersona(lastedPersona.identifier)
-                    }
+    const onRestore = useCallback(
+        async (backupInfo: { info: BackupPreview; id: string }, account: any) => {
+            try {
+                if (backupInfo.info?.wallets) {
+                    await Services.Welcome.checkPermissionAndOpenWalletRecovery(backupInfo.id)
+                    return
+                } else {
+                    await Services.Welcome.checkPermissionsAndRestore(backupInfo.id)
+
+                    await restoreCallback()
                 }
-                if (account) {
-                    if (!user.email && account.type === AccountType.email) {
-                        updateUser({ email: account.value })
-                    }
-                    if (!user.phone && account.type === AccountType.phone) {
-                        updateUser({ phone: account.value })
-                    }
-                }
-                toggleSynchronizePasswordDialog(true)
             } catch {
-                enqueueSnackbar(t.sign_in_account_cloud_restore_failed(), { variant: 'error' })
+                showSnackbar(t.sign_in_account_cloud_restore_failed(), { variant: 'error' })
             }
         },
         [user],
@@ -136,6 +146,10 @@ export const RestoreFromCloud = memo(() => {
         navigate(RoutePaths.Personas, { replace: true })
     }
 
+    useEffect(() => {
+        return Messages.events.restoreSuccess.on(restoreCallback)
+    }, [restoreCallback])
+
     return (
         <>
             <Stepper transition={getTransition} defaultStep="validate" step={step}>
@@ -153,7 +167,7 @@ export const RestoreFromCloud = memo(() => {
                                 <BackupPreviewCard json={backupBasicInfoJson} />
                             </Box>
                             <ButtonContainer>
-                                <LoadingButton variant="rounded" color="primary" onClick={handleRestore}>
+                                <LoadingButton size="large" variant="rounded" color="primary" onClick={handleRestore}>
                                     {t.restore()}
                                 </LoadingButton>
                             </ButtonContainer>

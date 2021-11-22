@@ -18,8 +18,8 @@ export default function PasswordSetting() {
 
     return (
         <>
-            <SettingButton onClick={() => setOpenSettingDialog(true)}>
-                {user.backupPassword ? t.settings_button_change() : t.settings_button_setting()}
+            <SettingButton size="large" onClick={() => setOpenSettingDialog(true)}>
+                {user.backupPassword ? t.settings_button_change() : t.settings_button_setup()}
             </SettingButton>
             {openSettingDialog ? (
                 <SettingPasswordDialog open={openSettingDialog} onClose={() => setOpenSettingDialog(false)} />

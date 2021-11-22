@@ -1,4 +1,4 @@
-import { Box, Button, Link, Stack, Typography } from '@material-ui/core'
+import { Box, Button, Link, Stack, Typography } from '@mui/material'
 import { memo, ReactNode, useCallback, useMemo } from 'react'
 import { FileMessageIcon, ITOIcon, MessageIcon, PollIcon, RedPacketIcon } from '@masknet/icons'
 import { getMaskColor, MaskColorVar } from '@masknet/theme'
@@ -104,7 +104,7 @@ export const PostHistoryRow = memo(({ post, network }: PostHistoryRowProps) => {
         const pluginId = SUPPORT_PLUGIN[pluginName]?.pluginId
 
         if (!pluginId) return null
-        const handler = () => Services.Settings.openSNSAndActivatePlugin(`https://${identifier.network}/home`, pluginId)
+        const handler = () => Services.SocialNetwork.openSNSAndActivatePlugin(`https://${identifier.network}`, pluginId)
 
         return (
             <Button color="secondary" variant="rounded" onClick={handler} sx={{ fontSize: 12 }}>
@@ -164,7 +164,7 @@ const PostHistoryRowUI = memo<PostHistoryRowUIProps>(({ post, message, icon, ope
             </Stack>
             <Stack flex={1} justifyContent="space-around" sx={{ cursor: 'pointer' }} gap={0.3} onClick={onClick}>
                 <Typography component="p" variant="body2">
-                    {post.summary!.length > 40 ? post.summary!.slice(0, 40) + '...' : post.summary}
+                    {(post.summary?.length ?? 0) > 40 ? post.summary!.slice(0, 40) + '...' : post.summary ?? ''}
                 </Typography>
                 <Typography component="p" variant="body2">
                     {message}

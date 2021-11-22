@@ -1,9 +1,9 @@
 import { DesktopMnemonicConfirm } from '../Mnemonic'
 import { useList } from 'react-use'
-import { Box, Typography } from '@material-ui/core'
+import { Box, Typography } from '@mui/material'
 import { getMaskColor, makeStyles } from '@masknet/theme'
 import { useDashboardI18N } from '../../locales'
-import { some } from 'lodash-es'
+import { some } from 'lodash-unified'
 import { MaskAlert } from '../MaskAlert'
 import { ButtonContainer } from '../RegisterFrame/ButtonContainer'
 import { Services } from '../../API'
@@ -67,6 +67,7 @@ export const RestoreFromMnemonic = () => {
             <ButtonContainer>
                 <LoadingButton
                     variant="rounded"
+                    size="large"
                     color="primary"
                     onClick={handleImport}
                     disabled={some(values, (value) => !value)}>

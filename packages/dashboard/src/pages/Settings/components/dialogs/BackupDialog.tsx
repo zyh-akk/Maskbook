@@ -3,26 +3,28 @@ import { PluginServices, Services } from '../../../../API'
 import { useAsync, useAsyncFn } from 'react-use'
 import BackupContentSelector, { BackupContentCheckedStatus } from '../BackupContentSelector'
 import { useDashboardI18N } from '../../../../locales'
-import { MaskDialog, useSnackbar } from '@masknet/theme'
-import { Box, DialogContent } from '@material-ui/core'
+import { MaskDialog, useCustomSnackbar } from '@masknet/theme'
+import { Box } from '@mui/material'
 import { UserContext } from '../../hooks/UserContext'
-import LoadingButton from '@material-ui/lab/LoadingButton'
+import LoadingButton from '@mui/lab/LoadingButton'
 import { fetchUploadLink, uploadBackupValue, VerifyCodeRequest } from '../../api'
 import formatDateTime from 'date-fns/format'
 import { LoadingCard } from '../../../../components/Restore/steps/LoadingCard'
 import { encryptBackup } from '@masknet/backup-format'
 import { encode } from '@msgpack/msgpack'
 import PasswordFiled from '../../../../components/PasswordField'
+import { MaskAlert } from '../../../../components/MaskAlert'
 
 export interface BackupDialogProps {
     local?: boolean
     params?: VerifyCodeRequest
     open: boolean
+    merged?: boolean
     onClose(): void
 }
 
-export default function BackupDialog({ local = true, params, open, onClose }: BackupDialogProps) {
-    const snackbar = useSnackbar()
+export default function BackupDialog({ local = true, params, open, merged, onClose }: BackupDialogProps) {
+    const { showSnackbar } = useCustomSnackbar()
     const t = useDashboardI18N()
     const [backupPassword, setBackupPassword] = useState('')
     const [paymentPassword, setPaymentPassword] = useState('')
@@ -43,17 +45,15 @@ export default function BackupDialog({ local = true, params, open, onClose }: Ba
             return
         }
 
-        if (showPassword.wallet) {
-            // for test
-            // await PluginServices.Wallet.createEncryptedWalletStore(paymentPassword)
-            const result = await PluginServices.Wallet.decryptWallet(paymentPassword)
-            if (!result.ok) {
-                setIncorrectPaymentPassword(true)
-                return
-            }
-        }
-
         try {
+            if (showPassword.wallet) {
+                const verified = await PluginServices.Wallet.verifyPassword(paymentPassword)
+                if (!verified) {
+                    setIncorrectPaymentPassword(true)
+                    return
+                }
+            }
+
             const fileJson = await Services.Welcome.createBackupFile({
                 noPosts: !showPassword.base,
                 noPersonas: !showPassword.base,
@@ -76,7 +76,7 @@ export default function BackupDialog({ local = true, params, open, onClose }: Ba
                 const encrypted = await encryptBackup(encode(params.account + backupPassword), encode(fileJson))
 
                 uploadBackupValue(uploadUrl, encrypted).then(() => {
-                    snackbar.enqueueSnackbar(t.settings_alert_backup_success(), { variant: 'success' })
+                    showSnackbar(t.settings_alert_backup_success(), { variant: 'success' })
                 })
             }
 
@@ -87,7 +87,7 @@ export default function BackupDialog({ local = true, params, open, onClose }: Ba
 
             onClose()
         } catch {
-            snackbar.enqueueSnackbar(t.settings_alert_backup_fail(), { variant: 'error' })
+            showSnackbar(t.settings_alert_backup_fail(), { variant: 'error' })
         }
     }, [backupPassword, paymentPassword])
 
@@ -112,45 +112,47 @@ export default function BackupDialog({ local = true, params, open, onClose }: Ba
 
     return (
         <MaskDialog maxWidth="xs" title={title} open={open} onClose={onClose}>
-            <DialogContent>
-                {searching ? (
-                    <Box sx={{ padding: '0 24px 24px' }}>
-                        <LoadingCard text={t.searching()} />
-                    </Box>
-                ) : (
-                    <Box sx={{ padding: '0 24px 24px' }}>
-                        {previewInfo ? (
-                            <BackupContentSelector json={previewInfo} onChange={handleContentChange} />
-                        ) : null}
+            {searching ? (
+                <Box sx={{ padding: '0 24px 24px' }}>
+                    <LoadingCard text={t.searching()} />
+                </Box>
+            ) : (
+                <Box sx={{ padding: '0 24px 24px' }}>
+                    {merged ? (
+                        <Box sx={{ marginBottom: '16px' }}>
+                            <MaskAlert description={t.settings_dialogs_backup_merged_tip()} type="success" />
+                        </Box>
+                    ) : null}
 
+                    {previewInfo ? <BackupContentSelector json={previewInfo} onChange={handleContentChange} /> : null}
+
+                    <PasswordFiled
+                        fullWidth
+                        value={backupPassword}
+                        onChange={(event) => setBackupPassword(event.target.value)}
+                        placeholder={t.settings_label_backup_password()}
+                        sx={{ marginBottom: '16px' }}
+                        error={incorrectBackupPassword}
+                        helperText={incorrectBackupPassword ? t.settings_dialogs_incorrect_password() : ''}
+                    />
+
+                    {showPassword.wallet ? (
                         <PasswordFiled
                             fullWidth
-                            value={backupPassword}
-                            onChange={(event) => setBackupPassword(event.target.value)}
-                            placeholder={t.settings_label_backup_password()}
+                            value={paymentPassword}
+                            onChange={(event) => setPaymentPassword(event.target.value)}
+                            placeholder={t.settings_label_payment_password()}
                             sx={{ marginBottom: '16px' }}
-                            error={incorrectBackupPassword}
-                            helperText={incorrectBackupPassword ? t.settings_dialogs_incorrect_password() : ''}
+                            error={incorrectPaymentPassword}
+                            helperText={incorrectPaymentPassword ? t.settings_dialogs_incorrect_password() : ''}
                         />
+                    ) : null}
 
-                        {showPassword.wallet ? (
-                            <PasswordFiled
-                                fullWidth
-                                value={paymentPassword}
-                                onChange={(event) => setPaymentPassword(event.target.value)}
-                                placeholder={t.settings_label_payment_password()}
-                                sx={{ marginBottom: '16px' }}
-                                error={incorrectPaymentPassword}
-                                helperText={incorrectPaymentPassword ? t.settings_dialogs_incorrect_password() : ''}
-                            />
-                        ) : null}
-
-                        <LoadingButton fullWidth disabled={backupDisabled} onClick={handleBackup} loading={loading}>
-                            {t.settings_button_backup()}
-                        </LoadingButton>
-                    </Box>
-                )}
-            </DialogContent>
+                    <LoadingButton fullWidth disabled={backupDisabled} onClick={handleBackup} loading={loading}>
+                        {t.settings_button_backup()}
+                    </LoadingButton>
+                </Box>
+            )}
         </MaskDialog>
     )
 }

@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Button, styled, Typography } from '@material-ui/core'
+import { Button, styled, Typography } from '@mui/material'
 import { SuccessIcon } from '@masknet/icons'
 import { MaskColorVar } from '@masknet/theme'
 import { useDashboardI18N } from '../../locales'
@@ -36,7 +36,7 @@ const Container = styled('div')`
 const SuccessTitle = styled(Typography)(({ theme }) => ({
     fontSize: theme.typography.h5.fontSize,
     color: theme.palette.success.main,
-    fontWeight: theme.typography.fontWeightMedium,
+    fontWeight: theme.typography.fontWeightMedium as any,
     margin: theme.spacing(2, 0),
 }))
 

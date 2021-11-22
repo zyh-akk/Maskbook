@@ -1,18 +1,10 @@
 import { FC, memo } from 'react'
-import { Box, Button, Stack, Typography } from '@material-ui/core'
-import {
-    getNetworkName,
-    ProviderType,
-    TransactionStatusType,
-    useChainColor,
-    useChainId,
-    useWallet,
-    useWeb3StateContext,
-} from '@masknet/web3-shared'
+import { Box, Button, Stack, Typography } from '@mui/material'
+import { TransactionStatusType } from '@masknet/web3-shared-evm'
 import { makeStyles, MaskColorVar } from '@masknet/theme'
-import { FormattedAddress, ProviderIcon, useRemoteControlledDialog } from '@masknet/shared'
+import { FormattedAddress, LoadingAnimation, useRemoteControlledDialog, WalletIcon } from '@masknet/shared'
+import { useNetworkDescriptor, useProviderDescriptor, useWallet, useWeb3State, Web3Plugin } from '@masknet/plugin-infra'
 import { PluginMessages } from '../../../../API'
-import { LoadingIcon } from '@masknet/icons'
 import { useRecentTransactions } from '../../hooks/useRecentTransactions'
 import { useDashboardI18N } from '../../../../locales'
 import { useNetworkSelector } from './useNetworkSelector'
@@ -41,59 +33,60 @@ export const WalletStateBar = memo(() => {
     const t = useDashboardI18N()
 
     const wallet = useWallet()
-    const { providerType } = useWeb3StateContext()
-    const chainId = useChainId()
-    const chainColor = useChainColor()
+    const networkDescriptor = useNetworkDescriptor()
+    const providerDescriptor = useProviderDescriptor()
 
     const { value: pendingTransactions = [] } = useRecentTransactions(TransactionStatusType.NOT_DEPEND)
+
+    const { openDialog: openWalletStatusDialog } = useRemoteControlledDialog(
+        PluginMessages.Wallet.events.walletStatusDialogUpdated,
+    )
 
     const { openDialog: openConnectWalletDialog } = useRemoteControlledDialog(
         PluginMessages.Wallet.events.selectProviderDialogUpdated,
     )
 
     const [menu, openMenu] = useNetworkSelector()
+
     if (!wallet) {
         return <Button onClick={openConnectWalletDialog}>{t.wallets_connect_wallet_connect()}</Button>
     }
     return (
         <WalletStateBarUI
             isPending={!!pendingTransactions.length}
-            networkName={getNetworkName(chainId)}
-            chainColor={chainColor}
-            providerType={providerType}
-            openConnectWalletDialog={openConnectWalletDialog}
-            openMenu={openMenu}
-            walletName={wallet.name ?? ''}
-            walletAddress={wallet.address}>
+            wallet={wallet}
+            network={networkDescriptor}
+            provider={providerDescriptor}
+            openConnectWalletDialog={openWalletStatusDialog}
+            openMenu={openMenu}>
             {menu}
         </WalletStateBarUI>
     )
 })
 
 interface WalletStateBarUIProps {
-    networkName?: string
-    chainColor: string
     isPending: boolean
-    providerType: ProviderType
-    walletName: string
-    walletAddress: string
+    network?: Web3Plugin.NetworkDescriptor
+    provider?: Web3Plugin.ProviderDescriptor
+    wallet?: Web3Plugin.Wallet
     openConnectWalletDialog(): void
     openMenu: ReturnType<typeof useNetworkSelector>[1]
 }
 
 export const WalletStateBarUI: FC<WalletStateBarUIProps> = ({
-    networkName,
     isPending,
-    providerType,
-    chainColor,
-    walletAddress,
-    walletName,
+    network,
+    provider,
+    wallet,
     openConnectWalletDialog,
     openMenu,
     children,
 }) => {
     const t = useDashboardI18N()
     const { classes } = useStyles()
+    const { Utils } = useWeb3State()
+
+    if (!wallet || !network || !provider) return null
 
     return (
         <Stack justifyContent="center" direction="row" alignItems="center">
@@ -101,13 +94,13 @@ export const WalletStateBarUI: FC<WalletStateBarUIProps> = ({
                 direction="row"
                 alignItems="center"
                 justifyContent="center"
-                sx={{ background: chainColor.replace(')', ', 0.1)'), px: 2, mr: 1 }}
-                color={chainColor}
+                sx={{ background: network.iconColor.replace(')', ', 0.1)'), px: 2, mr: 1 }}
+                color={network.iconColor ?? ''}
                 className={classes.bar}
                 onClick={openMenu}>
-                <Typography component="span" sx={{ background: chainColor }} className={classes.dot} />
+                <Typography component="span" sx={{ background: network.iconColor }} className={classes.dot} />
                 <Typography component="span" fontSize={12}>
-                    {networkName}
+                    {network.name}
                 </Typography>
             </Stack>
             {isPending && (
@@ -117,7 +110,7 @@ export const WalletStateBarUI: FC<WalletStateBarUIProps> = ({
                     justifyContent="center"
                     sx={{ px: 2, background: MaskColorVar.orangeMain.alpha(0.1), color: MaskColorVar.orangeMain }}
                     className={classes.bar}>
-                    <LoadingIcon sx={{ fontSize: 12, mr: 0.8, color: MaskColorVar.orangeMain }} />
+                    <LoadingAnimation sx={{ fontSize: 12, mr: 0.8, color: MaskColorVar.orangeMain }} />
                     <Typography component="span" fontSize={12} display="inline-block">
                         {t.wallet_transactions_pending()}
                     </Typography>
@@ -125,12 +118,12 @@ export const WalletStateBarUI: FC<WalletStateBarUIProps> = ({
             )}
             <Stack direction="row" onClick={openConnectWalletDialog} sx={{ cursor: 'pointer' }}>
                 <Stack mx={1} justifyContent="center">
-                    <ProviderIcon providerType={providerType} />
+                    <WalletIcon providerIcon={provider.icon} inverse size={38} />
                 </Stack>
                 <Box sx={{ userSelect: 'none' }}>
-                    <Box fontSize={16}>{walletName}</Box>
+                    <Box fontSize={16}>{wallet.name}</Box>
                     <Box fontSize={12}>
-                        <FormattedAddress address={walletAddress} size={10} />
+                        <FormattedAddress address={wallet.address} size={10} formatter={Utils?.formatAddress} />
                     </Box>
                 </Box>
             </Stack>

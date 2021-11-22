@@ -1,13 +1,13 @@
 import { ReactNode, useMemo, useState } from 'react'
 import { FixedSizeList, FixedSizeListProps } from 'react-window'
 import Fuse from 'fuse.js'
-import { uniqBy } from 'lodash-es'
-import { InputAdornment } from '@mui/material'
+import { uniqBy } from 'lodash-unified'
+import { Box, InputAdornment } from '@mui/material'
 import { makeStyles } from '../../makeStyles'
 import { Search } from '@mui/icons-material'
 import { MaskColorVar } from '../../constants'
 import { MaskSearchableItemInList } from './MaskSearchableItemInList'
-import { MaskTextField } from '../TextField'
+import { MaskTextField, MaskTextFieldProps } from '../TextField'
 
 export interface MaskSearchableListProps<T> {
     /** The list data should be render */
@@ -26,6 +26,7 @@ export interface MaskSearchableListProps<T> {
     onSelect(selected: T): void
     /** The hook when search */
     onSearch?(key: string): void
+    textFieldProps?: MaskTextFieldProps
 }
 
 /**
@@ -54,6 +55,7 @@ export function SearchableList<T>({
     searchKey,
     itemRender,
     FixedSizeListProps = {},
+    textFieldProps,
 }: MaskSearchableListProps<T>) {
     const [keyword, setKeyword] = useState('')
     const { classes } = useStyles()
@@ -86,19 +88,22 @@ export function SearchableList<T>({
 
     return (
         <div className={classes.container}>
-            <MaskTextField
-                placeholder="Search"
-                autoFocus
-                fullWidth
-                InputProps={{
-                    startAdornment: (
-                        <InputAdornment position="start">
-                            <Search />
-                        </InputAdornment>
-                    ),
-                }}
-                onChange={(e) => handleSearch(e.currentTarget.value)}
-            />
+            <Box pt={0.5}>
+                <MaskTextField
+                    placeholder="Search"
+                    autoFocus
+                    fullWidth
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <Search />
+                            </InputAdornment>
+                        ),
+                    }}
+                    onChange={(e) => handleSearch(e.currentTarget.value)}
+                    {...textFieldProps}
+                />
+            </Box>
             {placeholder}
             {!placeholder && (
                 <div className={classes.list}>

@@ -2,7 +2,7 @@ import { useAsyncRetry, useUpdateEffect } from 'react-use'
 import { Services } from '../../../API'
 import type { Relation } from '@masknet/shared'
 import { useRef } from 'react'
-import { last } from 'lodash-es'
+import { last } from 'lodash-unified'
 import { PersonaContext } from './usePersonaContext'
 
 export const useContacts = (network: string, page: number, size = 20) => {
@@ -29,7 +29,6 @@ export const useContacts = (network: string, page: number, size = 20) => {
         cache.current.set(page, last(values))
 
         const profiles = await Services.Identity.queryProfilesWithIdentifiers(values.map((x) => x.profile))
-
         return profiles.map((profile) => {
             const favor = values.find((x) => x.profile.equals(profile.identifier))?.favor
             return {

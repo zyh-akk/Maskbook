@@ -1,0 +1,10 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./",
+    "outDir": "../dist/evm",
+    "tsBuildInfoFile": "../dist/evm.tsbuildinfo"
+  },
+  "include": ["./", "./**/*.json"],
+  "references": [{ "path": "../../injected-script/sdk" }]
+}

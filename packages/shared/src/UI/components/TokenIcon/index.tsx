@@ -9,10 +9,10 @@ import {
     useBlockie,
     useChainId,
     useTokenAssetBaseURLConstants,
-} from '@masknet/web3-shared'
+} from '@masknet/web3-shared-evm'
 import { Avatar, AvatarProps } from '@mui/material'
 import { makeStyles } from '@masknet/theme'
-import { useImageFailOver } from '../../index'
+import { useImageFailOver } from '../../hooks'
 import SPECIAL_ICON_LIST from './TokenIconSpecialIconList.json'
 import { useStylesExtends } from '../../UIHelper/custom-ui-helper'
 

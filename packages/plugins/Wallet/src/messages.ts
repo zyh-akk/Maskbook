@@ -1,15 +1,15 @@
 import type BigNumber from 'bignumber.js'
+import type { JsonRpcPayload } from 'web3-core-helpers'
 import type {
     FungibleTokenDetailed,
     ERC721ContractDetailed,
-    GasNow,
+    GasOptions,
     NetworkType,
     ProviderType,
     TransactionState,
     Wallet,
     GasOption,
-} from '@masknet/web3-shared'
-import type { TransactionReceipt } from 'web3-core'
+} from '@masknet/web3-shared-evm'
 import { createPluginMessage, PluginMessageEmitter } from '@masknet/plugin-infra'
 import { PLUGIN_IDENTIFIER } from './constants'
 
@@ -27,7 +27,7 @@ export type TransactionDialogEvent =
 
 export type GasPriceDialogEvent = {
     open: boolean
-    type?: keyof GasNow
+    type?: keyof GasOptions
 }
 
 export type SelectProviderDialogEvent =
@@ -47,6 +47,7 @@ export type ConnectWalletDialogEvent =
       }
     | {
           open: false
+          result: boolean
       }
 
 export type SelectWalletDialogEvent =
@@ -58,29 +59,18 @@ export type SelectWalletDialogEvent =
           open: false
       }
 
-export type CreateImportWalletDialogEvent = {
-    open: boolean
-}
-
-export type CreateWalletDialogEvent = {
-    name?: string
-    open: boolean
-}
-
-export type ImportWalletDialogEvent = {
-    name?: string
-    open: boolean
-}
-
 export type WalletStatusDialogEvent = {
     open: boolean
 }
 
 export type GasSettingDialogEvent = {
     open: boolean
-    gasOption?: GasOption
-    gasLimit?: number | string
+    gasLimit: number
+    minGasLimit?: number
     gasPrice?: BigNumber.Value
+    maxFee?: BigNumber.Value
+    priorityFee?: BigNumber.Value
+    gasOption?: GasOption | null
 }
 
 export type WalletRenameDialogEvent = {
@@ -97,6 +87,10 @@ export type WalletRiskWarningDialogEvent =
           open: false
           type: 'cancel' | 'confirm'
       }
+
+export type RestoreLegacyWalletDialogEvent = {
+    open: boolean
+}
 
 export type WalletConnectQRCodeDialogEvent =
     | {
@@ -130,6 +124,20 @@ export type SelectTokenDialogEvent =
            */
           token?: FungibleTokenDetailed
       }
+export type SelectERC20TokenDialogEvent =
+    | {
+          open: true
+          props?: {
+              whitelist?: string[]
+              blacklist?: string[]
+              tokens?: FungibleTokenDetailed[]
+              selectedTokens?: string[]
+              onSelect?(token: FungibleTokenDetailed | null): void
+          }
+      }
+    | {
+          open: false
+      }
 
 export type SelectNftContractDialogEvent = {
     open: boolean
@@ -156,21 +164,6 @@ export interface WalletMessage {
      * Select wallet dialog
      */
     selectWalletDialogUpdated: SelectWalletDialogEvent
-
-    /**
-     * Create or import wallet choose dialog
-     */
-    createImportWalletDialogUpdated: CreateImportWalletDialogEvent
-
-    /**
-     * Create wallet dialog
-     */
-    createWalletDialogUpdated: CreateWalletDialogEvent
-
-    /**
-     * import wallet dialog
-     */
-    importWalletDialogUpdated: ImportWalletDialogEvent
 
     /**
      * Select provider dialog
@@ -217,17 +210,32 @@ export interface WalletMessage {
      */
     walletRiskWarningDialogUpdated: WalletRiskWarningDialogEvent
 
+    /**
+     * Restore Legacy Wallet Dialog
+     */
+    restoreLegacyWalletDialogUpdated: RestoreLegacyWalletDialogEvent
+
+    /**
+     * Select token dialog
+     */
+    selectERC20TokenDialogUpdated: SelectERC20TokenDialogEvent
+
     walletsUpdated: void
     phrasesUpdated: void
     addressBookUpdated: void
-    recentTransactionsUpdated: void
-    receiptUpdated: TransactionReceipt
-    requestsUpdated: void
+    transactionsUpdated: void
+    transactionStateUpdated: TransactionState
+    transactionProgressUpdated: {
+        state: TransactionState
+        payload: JsonRpcPayload
+    }
+    requestsUpdated: { hasRequest: boolean }
     erc20TokensUpdated: void
     erc721TokensUpdated: void
     erc1155TokensUpdated: void
     /** true: Now locked; false: Now unlocked */
     walletLockStatusUpdated: boolean
+
     rpc: unknown
 }
 

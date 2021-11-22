@@ -1,8 +1,21 @@
-import { pick, noop } from 'lodash-es'
+import { noop } from 'lodash-unified'
 import type { Subscription } from 'use-subscription'
-import { ChainId, PortfolioProvider, ProviderType } from '@masknet/web3-shared'
-import { ERC20TokenDetailed, EthereumTokenType, NetworkType, Wallet, Web3ProviderType } from '@masknet/web3-shared'
-import { Messages, PluginMessages, PluginServices, Services } from '../API'
+import type { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers'
+import {
+    ChainId,
+    ERC1155TokenDetailed,
+    ERC721TokenDetailed,
+    PortfolioProvider,
+    ProviderType,
+    ERC20TokenDetailed,
+    EthereumTokenType,
+    NetworkType,
+    Web3ProviderType,
+    SendOverrides,
+    RequestOptions,
+    isInjectedProvider,
+} from '@masknet/web3-shared-evm'
+import { Services, Messages, PluginServices, PluginMessages } from '../API'
 
 const Web3Provider = createExternalProvider()
 
@@ -15,24 +28,17 @@ export const Web3Context: Web3ProviderType = {
         return () => {}
     }),
     account: createSubscriptionFromAsync(
-        Services.Settings.getSelectedWalletAddress,
+        async () => {
+            const providerType = await Services.Settings.getCurrentSelectedWalletProvider()
+            if (isInjectedProvider(providerType)) return ''
+            return Services.Settings.getSelectedWalletAddress()
+        },
         '',
-        Messages.events.currentAccountSettings.on,
-    ),
-    nonce: createSubscriptionFromAsync(
-        Services.Settings.getBlockNumber,
-        0,
-        Messages.events.currentBlockNumberSettings.on,
-    ),
-    gasPrice: createSubscriptionFromAsync(
-        Services.Settings.getBlockNumber,
-        0,
-        Messages.events.currentBlockNumberSettings.on,
-    ),
-    etherPrice: createSubscriptionFromAsync(
-        Services.Settings.getEtherPrice,
-        0,
-        Messages.events.currentEtherPriceSettings.on,
+        (callback) => {
+            const a = Messages.events.currentAccountSettings.on(callback)
+            const b = Messages.events.currentProviderSettings.on(callback)
+            return () => void [a(), b()]
+        },
     ),
     tokenPrices: createSubscriptionFromAsync(
         Services.Settings.getTokenPrices,
@@ -60,78 +66,85 @@ export const Web3Context: Web3ProviderType = {
         NetworkType.Ethereum,
         Messages.events.currentNetworkSettings.on,
     ),
-    wallets: createSubscriptionFromAsync(getWallets, [], PluginMessages.Wallet.events.walletsUpdated.on),
-    erc20Tokens: createSubscriptionFromAsync(getERC20Tokens, [], PluginMessages.Wallet.events.erc20TokensUpdated.on),
-    addERC20Token: PluginServices.Wallet.addERC20Token,
-    trustERC20Token: PluginServices.Wallet.trustERC20Token,
-    erc20TokensCount: createSubscriptionFromAsync(
-        PluginServices.Wallet.getERC20TokensCount,
-        0,
+    walletPrimary: createSubscriptionFromAsync(
+        PluginServices.Wallet.getWalletPrimary,
+        null,
+        PluginMessages.Wallet.events.walletsUpdated.on,
+    ),
+    wallets: createSubscriptionFromAsync(
+        PluginServices.Wallet.getWallets,
+        [],
+        PluginMessages.Wallet.events.walletsUpdated.on,
+    ),
+    erc20Tokens: createSubscriptionFromAsync(
+        () => PluginServices.Wallet.getTokens<ERC20TokenDetailed>(EthereumTokenType.ERC20),
+        [],
         PluginMessages.Wallet.events.erc20TokensUpdated.on,
     ),
-    getERC20TokensPaged,
+    erc721Tokens: createSubscriptionFromAsync(
+        () => PluginServices.Wallet.getTokens<ERC721TokenDetailed>(EthereumTokenType.ERC721),
+        [],
+        PluginMessages.Wallet.events.erc721TokensUpdated.on,
+    ),
+    erc1155Tokens: createSubscriptionFromAsync(
+        () => PluginServices.Wallet.getTokens<ERC1155TokenDetailed>(EthereumTokenType.ERC1155),
+        [],
+        PluginMessages.Wallet.events.erc1155TokensUpdated.on,
+    ),
     portfolioProvider: createSubscriptionFromAsync(
         Services.Settings.getCurrentPortfolioDataProvider,
         PortfolioProvider.DEBANK,
         Messages.events.currentPortfolioDataProviderSettings.on,
     ),
+
+    addToken: PluginServices.Wallet.addToken,
+    removeToken: PluginServices.Wallet.removeToken,
+    trustToken: PluginServices.Wallet.trustToken,
+    blockToken: PluginServices.Wallet.blockToken,
+
     getAssetsList: PluginServices.Wallet.getAssetsList,
     getAssetsListNFT: PluginServices.Wallet.getAssetsListNFT,
     getAddressNamesList: PluginServices.Wallet.getAddressNames,
-    getERC721TokensPaged,
     getTransactionList: PluginServices.Wallet.getTransactionList,
     fetchERC20TokensFromTokenLists: Services.Ethereum.fetchERC20TokensFromTokenLists,
-    createMnemonicWords: PluginServices.Wallet.createMnemonicWords,
-    getNonce: Services.Ethereum.getNonce,
 }
 
 export function createExternalProvider() {
+    const send = (
+        payload: JsonRpcPayload,
+        callback: (error: Error | null, response?: JsonRpcResponse) => void,
+        overrides?: SendOverrides,
+        options?: RequestOptions,
+    ) => {
+        Services.Ethereum.request(
+            {
+                method: payload.method,
+                params: payload.params,
+            },
+            overrides,
+            options,
+        ).then(
+            (result) => {
+                callback(null, {
+                    jsonrpc: '2.0',
+                    id: payload.id as number,
+                    result,
+                })
+            },
+            (error) => {
+                callback(error)
+            },
+        )
+    }
     return {
         isMetaMask: false,
         isStatus: true,
         host: '',
         path: '',
         request: Services.Ethereum.request,
-        send: Services.Ethereum.requestSend,
-        sendAsync: Services.Ethereum.requestSend,
+        send,
+        sendAsync: send,
     }
-}
-
-async function getWallets() {
-    const raw = await PluginServices.Wallet.getWallets()
-    return raw.map<Wallet>((record) => ({
-        ...pick(record, [
-            'address',
-            'name',
-            'erc1155_token_whitelist',
-            'erc1155_token_blacklist',
-            'erc20_token_whitelist',
-            'erc20_token_blacklist',
-            'erc721_token_whitelist',
-            'erc721_token_blacklist',
-        ] as (keyof typeof record)[]),
-        hasPrivateKey: Boolean(record._private_key_ || record.mnemonic.length),
-    }))
-}
-
-async function getERC20Tokens() {
-    const raw = await PluginServices.Wallet.getERC20Tokens()
-    return raw.map<ERC20TokenDetailed>((x) => ({
-        type: EthereumTokenType.ERC20,
-        ...x,
-    }))
-}
-
-async function getERC20TokensPaged(index: number, count: number, query?: string) {
-    const raw = await PluginServices.Wallet.getERC20TokensPaged(index, count, query)
-    return raw.map<ERC20TokenDetailed>((x) => ({
-        type: EthereumTokenType.ERC20,
-        ...x,
-    }))
-}
-
-async function getERC721TokensPaged(index: number, count: number, query?: string) {
-    return PluginServices.Wallet.getERC721TokensPaged(index, count, query)
 }
 
 // double check

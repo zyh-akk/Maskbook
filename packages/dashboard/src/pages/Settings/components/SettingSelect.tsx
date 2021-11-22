@@ -1,5 +1,5 @@
 import { MaskColorVar } from '@masknet/theme'
-import { Select, styled, selectClasses, outlinedInputClasses } from '@material-ui/core'
+import { Select, styled, selectClasses, outlinedInputClasses } from '@mui/material'
 
 export default styled(Select)(() => ({
     [`& .${selectClasses.select}.${selectClasses.outlined}`]: {
@@ -9,4 +9,4 @@ export default styled(Select)(() => ({
     [`& .${outlinedInputClasses.notchedOutline}`]: {
         borderColor: MaskColorVar.lineLighter,
     },
-}))
+})) as any as typeof Select

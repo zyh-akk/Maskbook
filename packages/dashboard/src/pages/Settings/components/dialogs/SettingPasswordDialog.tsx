@@ -1,10 +1,10 @@
 import ConfirmDialog from '../../../../components/ConfirmDialog'
 import { useEffect, useState, useContext } from 'react'
-import { Box, Typography } from '@material-ui/core'
+import { Box, Typography } from '@mui/material'
 import { UserContext } from '../../hooks/UserContext'
 import { useDashboardI18N } from '../../../../locales'
 import { passwordRegexp } from '../../regexp'
-import { useSnackbar } from '@masknet/theme'
+import { useCustomSnackbar } from '@masknet/theme'
 import PasswordField from '../../../../components/PasswordField'
 
 interface SettingPasswordDialogProps {
@@ -15,7 +15,7 @@ interface SettingPasswordDialogProps {
 
 export default function SettingPasswordDialog({ open, onClose, onSet }: SettingPasswordDialogProps) {
     const t = useDashboardI18N()
-    const snackbar = useSnackbar()
+    const { showSnackbar } = useCustomSnackbar()
     const { user, updateUser } = useContext(UserContext)
     const [incorrectPassword, setIncorrectPassword] = useState(false)
     const [passwordValid, setValidState] = useState(true)
@@ -42,7 +42,7 @@ export default function SettingPasswordDialog({ open, onClose, onSet }: SettingP
 
         if (passwordValid && matched) {
             const msg = user.backupPassword ? t.settings_alert_password_updated() : t.settings_alert_password_set()
-            snackbar.enqueueSnackbar(msg, {
+            showSnackbar(msg, {
                 variant: 'success',
             })
 
@@ -79,7 +79,7 @@ export default function SettingPasswordDialog({ open, onClose, onSet }: SettingP
             open={open}
             onClose={handleClose}
             onConfirm={handleConfirm}>
-            <Box sx={{ minHeight: '160px' }}>
+            <Box sx={{ minHeight: '160px' }} py={1}>
                 {user.backupPassword ? (
                     <PasswordField
                         fullWidth

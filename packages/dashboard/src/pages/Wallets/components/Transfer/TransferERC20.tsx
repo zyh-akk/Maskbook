@@ -1,29 +1,30 @@
 import { MaskTextField } from '@masknet/theme'
-import { Box, Button, IconButton, Stack, Typography } from '@material-ui/core'
+import { Box, Button, IconButton, Stack, Typography } from '@mui/material'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import {
     EthereumTokenType,
     formatWeiToEther,
     FungibleTokenDetailed,
+    isEIP1559Supported,
     isGreaterThan,
     isZero,
     pow10,
     TransactionStateType,
+    useChainId,
     useFungibleTokenBalance,
     useGasLimit,
     useGasPrice,
     useNativeTokenDetailed,
     useTokenTransferCallback,
-    GasOption,
-} from '@masknet/web3-shared'
+} from '@masknet/web3-shared-evm'
 import BigNumber from 'bignumber.js'
-import { TokenAmountPanel, useRemoteControlledDialog } from '@masknet/shared'
-import TuneIcon from '@material-ui/icons/Tune'
-import { WalletMessages } from '@masknet/plugin-wallet'
+import { TokenAmountPanel } from '@masknet/shared'
+import TuneIcon from '@mui/icons-material/Tune'
 import { EthereumAddress } from 'wallet.ts'
 import { SelectTokenDialog } from '../SelectTokenDialog'
 import { useDashboardI18N } from '../../../../locales'
 import { useNativeTokenPrice } from './useNativeTokenPrice'
+import { useGasConfig } from '../../hooks/useGasConfig'
 
 interface TransferERC20Props {
     token: FungibleTokenDetailed
@@ -35,14 +36,19 @@ export const TransferERC20 = memo<TransferERC20Props>(({ token }) => {
     const [amount, setAmount] = useState('')
     const [address, setAddress] = useState('')
     const [memo, setMemo] = useState('')
-    const [selectedToken, setToken] = useState<FungibleTokenDetailed>(token)
-    const [isOpenSelectTokenDialog, openSelectTokenDialog] = useState(false)
-    const [gasOption, setGasOption] = useState<GasOption>(GasOption.Medium)
 
-    // gas price
+    const [gasLimit_, setGasLimit_] = useState(0)
+
     const { value: defaultGasPrice = '0' } = useGasPrice()
-    const [customGasPrice, setCustomGasPrice] = useState<BigNumber.Value>(0)
-    const gasPrice = customGasPrice || defaultGasPrice
+
+    const [selectedToken, setSelectedToken] = useState<FungibleTokenDetailed>(token)
+    const [isOpenSelectTokenDialog, openSelectTokenDialog] = useState(false)
+    const chainId = useChainId()
+    const is1559Supported = useMemo(() => isEIP1559Supported(chainId), [chainId])
+
+    useEffect(() => {
+        setSelectedToken(token)
+    }, [token])
 
     // balance
     const { value: tokenBalance = '0', retry: tokenBalanceRetry } = useFungibleTokenBalance(
@@ -56,11 +62,19 @@ export const TransferERC20 = memo<TransferERC20Props>(({ token }) => {
     // transfer amount
     const transferAmount = new BigNumber(amount || '0').multipliedBy(pow10(selectedToken.decimals)).toFixed()
     const erc20GasLimit = useGasLimit(selectedToken.type, selectedToken.address, transferAmount, address)
-    const [gasLimit, setGasLimit] = useState<string | number>(0)
+    const { gasConfig, onCustomGasSetting, gasLimit, maxFee } = useGasConfig(gasLimit_, 30000)
+    const gasPrice = gasConfig.gasPrice || defaultGasPrice
+
     useEffect(() => {
-        setGasLimit(isNativeToken ? GAS_LIMIT : erc20GasLimit.value?.toFixed() ?? 0)
+        setGasLimit_(isNativeToken ? GAS_LIMIT : erc20GasLimit.value ?? 0)
     }, [isNativeToken, erc20GasLimit.value])
-    const gasFee = useMemo(() => new BigNumber(gasLimit).multipliedBy(gasPrice), [gasLimit, gasPrice])
+
+    const gasFee = useMemo(() => {
+        const price = is1559Supported && maxFee ? new BigNumber(maxFee) : gasPrice
+        return new BigNumber(gasLimit).multipliedBy(price)
+    }, [gasLimit, gasPrice, maxFee, is1559Supported])
+    const gasFeeInUsd = formatWeiToEther(gasFee).multipliedBy(nativeTokenPrice)
+
     const maxAmount = useMemo(() => {
         let amount_ = new BigNumber(tokenBalance || '0')
         amount_ = selectedToken.type === EthereumTokenType.Native ? amount_.minus(gasFee) : amount_
@@ -72,25 +86,9 @@ export const TransferERC20 = memo<TransferERC20Props>(({ token }) => {
         selectedToken.address,
     )
 
-    const { setDialog: setGasSettingDialog } = useRemoteControlledDialog(WalletMessages.events.gasSettingDialogUpdated)
-    const openGasSettingDialog = useCallback(() => {
-        setGasSettingDialog({
-            open: true,
-            gasLimit,
-            gasOption,
-        })
-    }, [gasLimit, gasOption])
-
-    useEffect(() => {
-        return WalletMessages.events.gasSettingDialogUpdated.on((evt) => {
-            if (evt.gasPrice) setCustomGasPrice(evt.gasPrice)
-            if (evt.gasOption) setGasOption(evt.gasOption)
-            if (evt.gasLimit) setGasLimit(evt.gasLimit)
-        })
-    }, [])
     const onTransfer = useCallback(async () => {
-        await transferCallback(transferAmount, address, undefined, memo)
-    }, [transferAmount, address, memo, selectedToken.decimals, transferCallback])
+        await transferCallback(transferAmount, address, gasConfig, memo)
+    }, [transferAmount, address, memo, selectedToken.decimals, transferCallback, gasConfig])
 
     //#region validation
     const validationMessage = useMemo(() => {
@@ -114,7 +112,7 @@ export const TransferERC20 = memo<TransferERC20Props>(({ token }) => {
 
     return (
         <Stack direction="row" justifyContent="center" mt={4}>
-            <Stack maxWidth={640} minWidth={500}>
+            <Stack width={640} minWidth={500}>
                 <Box>
                     <MaskTextField
                         required
@@ -144,14 +142,14 @@ export const TransferERC20 = memo<TransferERC20Props>(({ token }) => {
                         {t.gas_fee()}
                     </Typography>
                     <Box display="flex" flexDirection="row" alignItems="center">
-                        <Typography fontSize="14px">
+                        <Typography fontSize="14px" title={`$${gasFeeInUsd.toString()}`}>
                             {t.transfer_cost({
                                 gasFee: formatWeiToEther(gasFee).toFixed(6),
                                 symbol: nativeToken.value?.symbol ?? '',
-                                usd: formatWeiToEther(gasFee).multipliedBy(nativeTokenPrice).toFixed(2),
+                                usd: gasFeeInUsd.toFixed(2),
                             })}
                         </Typography>
-                        <IconButton size="small" onClick={openGasSettingDialog}>
+                        <IconButton size="small" onClick={onCustomGasSetting}>
                             <TuneIcon fontSize="small" />
                         </IconButton>
                     </Box>
@@ -180,7 +178,7 @@ export const TransferERC20 = memo<TransferERC20Props>(({ token }) => {
             {isOpenSelectTokenDialog && (
                 <SelectTokenDialog
                     onSelect={(token) => {
-                        setToken(token!)
+                        setSelectedToken(token!)
                         openSelectTokenDialog(false)
                     }}
                     open={isOpenSelectTokenDialog}
